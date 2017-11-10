@@ -61,6 +61,20 @@ public class AdjacencyList {
 		return neighbors;
 	}
 	
+	public boolean isNeighbor(Node node1, Node node2) {
+		List<Node> neighbors = getNeighbors(node1);	
+		if(neighbors==null) {
+			return false;
+		}
+		else {
+			for(Node eachNeighbor:neighbors) {
+				if(eachNeighbor.equals(node2)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 	public boolean addEdge(Edge edge) {
 		Node from = edge.getFrom();
 		boolean present = false;
