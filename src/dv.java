@@ -1,10 +1,8 @@
 import java.io.File;
 import java.util.Scanner;
 import java.util.Timer;
-
 import prakash.ram.client.Client;
 import prakash.ram.model.AdjacencyList;
-import prakash.ram.model.Edge;
 import prakash.ram.model.Node;
 import prakash.ram.server.Server;
 
