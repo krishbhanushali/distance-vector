@@ -98,6 +98,7 @@ public class AdjacencyList {
 		return Integer.MAX_VALUE;
 	}
 	
+	
 	public Node getNode(int id) {
 		Iterator entries = adjacencyList.entrySet().iterator();
 		while(entries.hasNext()) {
@@ -109,5 +110,15 @@ public class AdjacencyList {
 			}
 		}
 		return null;
+	}
+	
+	
+	public void changeDistance(Node from, Node to, int cost) {
+		Collection<Edge> edges = adjacencyList.get(from);
+		for(Edge edge:edges) {
+			if(edge.getTo().equals(to)) {
+				edge.setCost(cost);
+			}
+		}
 	}
 }

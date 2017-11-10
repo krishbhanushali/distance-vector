@@ -13,10 +13,12 @@ public class Server extends Thread{
 	private int port = 0;
 	public Server(int port)
     {
-        // starts server and waits for a connection
+       this.port = port;
+    }
+	public void run() {
+		 // starts server and waits for a connection
         try
         {
-        		this.port = port;
             server = new ServerSocket(port);
             System.out.println("Server started");
             System.out.println("Waiting for a client ...");
@@ -28,24 +30,24 @@ public class Server extends Thread{
             in = new DataInputStream(
                 new BufferedInputStream(socket.getInputStream()));
  
-            String line = "";
- 
-            // reads message from client until "Over" is sent
-            while (!line.equals("Over"))
-            {
-                try
-                {
-                    line = in.readUTF();
-                    System.out.println(line);
- 
-                }
-                catch(IOException i)
-                {
-                    System.out.println(i);
-                }
-            }
-            System.out.println("Closing connection");
- 
+//            String line = "";
+// 
+//            // reads message from client until "Over" is sent
+//            while (!line.equals("Over"))
+//            {
+//                try
+//                {
+//                    line = in.readUTF();
+//                    System.out.println(line);
+// 
+//                }
+//                catch(IOException i)
+//                {
+//                    System.out.println(i);
+//                }
+//            }
+//            System.out.println("Closing connection");
+// 
             // close connection
             socket.close();
             in.close();
@@ -54,12 +56,5 @@ public class Server extends Thread{
         {
             System.out.println(i);
         }
-    }
-	public void run() {
-		
 	}
-    public static void main(String args[])
-    {
-        Server server = new Server(5000);
-    }
 }
