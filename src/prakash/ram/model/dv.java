@@ -183,6 +183,8 @@ public class dv {
 			}
 		}catch(Exception e) {
 			System.out.println("Sending failed because "+e.getMessage());
+		}finally {
+			bos.close();
 		}
 	}
 	
