@@ -10,25 +10,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.Set;
 
-public class AdjacencyList {
-	private Map<Node,Collection<Edge>> adjacencyList;
+public class AdjacencyList extends dv{
+	public Map<Node,Collection<Edge>> adjacencyList;
 	
 	public AdjacencyList() {
 		adjacencyList = new HashMap<Node,Collection<Edge>>();
 	}
-	public AdjacencyList(File file) {
+	public AdjacencyList(File file, String ipAddress) {
 		adjacencyList = new HashMap<Node,Collection<Edge>>();
 		try {
 			Scanner scanner = new Scanner(file);
 			int numberOfServers = scanner.nextInt();
 			int numberOfNeighbors = scanner.nextInt();
 			scanner.nextLine();
+			int id = Integer.MIN_VALUE;
 			for(int i = 0 ; i < numberOfServers;i++) {
 				String line = scanner.nextLine();
 				String[] parts = line.split(" ");
 				Node server = new Node(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2]));
+				if(parts[1].equals(ipAddress)) {
+					id = Integer.parseInt(parts[0]);
+				}
 				addNode(server);
+				connect(parts[1], Integer.parseInt(parts[2]),id);
 			}
 			for(int i = 0 ; i < numberOfNeighbors;i++) {
 				String line = scanner.nextLine();
@@ -134,6 +140,9 @@ public class AdjacencyList {
 				edge.setCost(cost);
 			}
 		}
-		
+	}
+	
+	public Set<Node> getAllNodes(){
+		return adjacencyList.keySet();
 	}
 }
