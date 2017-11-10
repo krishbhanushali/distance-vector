@@ -1,16 +1,22 @@
 package prakash.ram.model;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -28,6 +34,7 @@ public class dv {
 	static Selector write;
 	static String myIP = "";
 	static int myID = Integer.MIN_VALUE;
+	static Node myNode = null;
 	public static void main(String[] args) throws IOException{
 		
 		read = Selector.open();
@@ -52,6 +59,7 @@ public class dv {
 				String filename = arguments[1];
 				time = Integer.parseInt(arguments[3]);
 				readTopology(filename);
+				myNode = al.getNode(myID);
 				break;
 			case "update": //update <server-id1> <server-id2> <link Cost>
 				update(Integer.parseInt(arguments[1]),Integer.parseInt(arguments[2]),Integer.parseInt(arguments[3]));
@@ -119,14 +127,14 @@ public class dv {
 		System.out.println("Connecting to ip:- "+ip);
 		try {
 			if(!ip.equals(myIP)) {
-				SocketChannel socketChannel = SocketChannel.open();
+				/*SocketChannel socketChannel = SocketChannel.open();
 				socketChannel.connect(new InetSocketAddress(ip,port));
 				socketChannel.configureBlocking(false);
 				socketChannel.register(read, SelectionKey.OP_READ);
 				socketChannel.register(write,SelectionKey.OP_WRITE);
 				openChannels.add(socketChannel);
 				System.out.println(".......");
-				System.out.println("Connected to "+ip);
+				System.out.println("Connected to "+ip);*/
 			}
 			else {
 				System.out.println("You cannot connect to yourself!!!");
@@ -137,8 +145,47 @@ public class dv {
 	}
 	
 	public static void step() {
-		
+		List<Node> neighbors = al.getNeighbors(myNode);
+		Collection<Edge> edges = al.adjacencyList.get(myNode);
+		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),edges);
+		for(Node eachNeighbor:neighbors) {
+			sendMessage(eachNeighbor,message); //sending message to each neighbor
+			System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");
+		}
 	}
+	
+	public static void sendMessage(Node eachNeigbor, Message message) {
+		int semaphore = 0;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutput out = null;
+		try {
+			out = new ObjectOutputStream(bos);
+			out.writeObject(message);
+			out.flush();
+			byte[] bytes = bos.toByteArray();
+			semaphore = write.select();
+			if(semaphore>0) {
+				Set<SelectionKey> keys = write.selectedKeys();
+				Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
+				ByteBuffer buffer = ByteBuffer.allocate(Integer.MAX_VALUE);
+				buffer.put(bytes);
+				buffer.flip();
+				while(selectedKeysIterator.hasNext())
+				{
+					SelectionKey selectionKey=selectedKeysIterator.next();
+					if(parseChannelIp((SocketChannel)selectionKey.channel()).equals(al.getNode(eachNeigbor.getId())))
+					{
+						SocketChannel socketChannel=(SocketChannel)selectionKey.channel();
+						socketChannel.write(buffer);
+					}
+					selectedKeysIterator.remove();
+				}
+			}
+		}catch(Exception e) {
+			System.out.println("Sending failed because "+e.getMessage());
+		}
+	}
+	
 }
 
 

@@ -39,8 +39,10 @@ public class AdjacencyList extends dv{
 			for(int i = 0 ; i < numberOfNeighbors;i++) {
 				String line = scanner.nextLine();
 				String[] parts = line.split(" ");
-				Edge edge = new Edge(getNode(Integer.parseInt(parts[0])),getNode(Integer.parseInt(parts[1])),Integer.parseInt(parts[2]));
-				addEdge(edge);
+				Edge edge1 = new Edge(getNode(Integer.parseInt(parts[0])),getNode(Integer.parseInt(parts[1])),Integer.parseInt(parts[2]));
+				addEdge(edge1);
+				Edge edge2 = new Edge(getNode(Integer.parseInt(parts[1])),getNode(Integer.parseInt(parts[0])),Integer.parseInt(parts[2]));
+				addEdge(edge2);
 			}
 			scanner.close();
 		} catch (FileNotFoundException e) {
