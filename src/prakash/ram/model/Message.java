@@ -1,9 +1,11 @@
 package prakash.ram.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public class Message {
-	
+public class Message implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private String ipAddress;
 	private int port;

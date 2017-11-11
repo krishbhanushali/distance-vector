@@ -6,7 +6,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
@@ -21,6 +20,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Timer;
+import java.util.Map.Entry;
+
 import prakash.ram.client.Client;
 import prakash.ram.server.Server;
 
@@ -70,6 +71,7 @@ public class dv {
 			case "packets":
 				break;
 			case "display":
+				display();
 				break;
 			case "disable":
 				break;
@@ -87,7 +89,6 @@ public class dv {
 	}
 	
 	private static String getMyLanIP() {
-		// TODO Auto-generated method stub
 		try {
 		    Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 		    while (interfaces.hasMoreElements()) {
@@ -115,10 +116,14 @@ public class dv {
         System.out.println("Reading topology done.");
 	}
 	
-	public static void update(int serverId1, int serverId2, int cost) {
+	public static void update(int serverId1, int serverId2, int cost) throws IOException {
 		Node from = al.getNode(serverId1);
 		Node to = al.getNode(serverId2);
 		al.changeDistance(from, to, cost);
+		Collection<Edge> edges = al.adjacencyList.get(myNode);
+		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),edges);
+		/*sendMessage(to,message);
+		System.out.println("Message sent to "+to.getIpAddress());*/
 		System.out.println("Update success");
 	}
 	
@@ -144,7 +149,7 @@ public class dv {
 		}
 	}
 	
-	public static void step() {
+	public static void step() throws IOException{
 		List<Node> neighbors = al.getNeighbors(myNode);
 		Collection<Edge> edges = al.adjacencyList.get(myNode);
 		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),edges);
@@ -152,9 +157,10 @@ public class dv {
 			sendMessage(eachNeighbor,message); //sending message to each neighbor
 			System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");
 		}
+		System.out.println("Step SUCCESS");
 	}
 	
-	public static void sendMessage(Node eachNeigbor, Message message) {
+	public static void sendMessage(Node eachNeigbor, Message message) throws IOException{
 		int semaphore = 0;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutput out = null;
@@ -173,7 +179,7 @@ public class dv {
 				while(selectedKeysIterator.hasNext())
 				{
 					SelectionKey selectionKey=selectedKeysIterator.next();
-					if(parseChannelIp((SocketChannel)selectionKey.channel()).equals(al.getNode(eachNeigbor.getId())))
+					if(parseChannelIp((SocketChannel)selectionKey.channel()).equals(al.getNode(eachNeigbor.getId()).getIpAddress()))
 					{
 						SocketChannel socketChannel=(SocketChannel)selectionKey.channel();
 						socketChannel.write(buffer);
@@ -185,6 +191,44 @@ public class dv {
 			System.out.println("Sending failed because "+e.getMessage());
 		}finally {
 			bos.close();
+		}
+	}
+	
+	public static String parseChannelIp(SocketChannel channel){//parse the ip form the SocketChannel.getRemoteAddress();
+		String ip = null;
+		String rawIp =null;  
+		try {
+			rawIp = channel.getRemoteAddress().toString().split(":")[0];
+			ip = rawIp.substring(1, rawIp.length());
+		} catch (IOException e) {
+			System.out.println("can't convert channel to ip");
+		}
+		return ip;
+	}
+	
+	public static Integer parseChannelPort(SocketChannel channel){//parse the ip form the SocketChannel.getRemoteAddress();
+		String port =null;  
+		try {
+			port = channel.getRemoteAddress().toString().split(":")[1];
+		} catch (IOException e) {
+			System.out.println("can't convert channel to ip");
+		}
+		return Integer.parseInt(port);
+	}
+	
+	public static void display() {
+		System.out.println("Next Hop ID\tNext Hop IP\t\tCost");
+		Iterator entries = al.adjacencyList.entrySet().iterator();
+		while(entries.hasNext()) {
+			Entry thisEntry = (Entry)entries.next();
+			Object key = (Node)thisEntry.getKey();
+			Node n = (Node)key;
+			if(n.getId()==myID) {
+				Collection<Edge> links = al.adjacencyList.get(n);
+				for(Edge edge:links) {
+					System.out.println(edge.getTo().getId()+"\t\t"+edge.getTo().getIpAddress()+"\t\t"+edge.getCost());
+				}
+			}
 		}
 	}
 	
