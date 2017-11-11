@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class Edge implements Serializable {
 	private static final long serialVersionUID = 1L;
+
 	private Node from;
 	private Node to;
 	private int cost;

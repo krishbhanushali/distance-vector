@@ -123,6 +123,7 @@ public class dv {
 		al.changeDistance(from, to, cost);
 		Collection<Edge> edges = al.adjacencyList.get(myNode);
 		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),edges);
+
 		sendMessage(to,message);
 		System.out.println("Message sent to "+to.getIpAddress());
 		System.out.println("Update success");
@@ -133,6 +134,7 @@ public class dv {
 		System.out.println("Connecting to ip:- "+ip);
 		try {
 			if(!ip.equals(myIP)) {
+
 				SocketChannel socketChannel = SocketChannel.open();
 				socketChannel.connect(new InetSocketAddress(ip,port));
 				socketChannel.configureBlocking(false);
