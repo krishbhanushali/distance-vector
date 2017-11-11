@@ -1,75 +1,49 @@
 package prakash.ram.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 
-import prakash.ram.model.AdjacencyList;
+import prakash.ram.model.Edge;
+import prakash.ram.model.Message;
+import prakash.ram.model.Node;
+import prakash.ram.model.dv;
 
 public class Client extends Thread
 {
-    // initialize socket and input output streams
-    private Socket socket            = null;
-    private DataInputStream  input   = null;
-    private DataOutputStream out     = null;
- 
-    // constructor to put ip address and port
+    Set<SelectionKey> keys;
+    Iterator<SelectionKey> selectedKeysIterator;
+    ByteBuffer buffer = ByteBuffer.allocate(1024);
+    SocketChannel socketChannel;
+    int byteRead;
     public void Run()
     {
-        // establish a connection
-        try
-        {
-            socket = new Socket();
-            System.out.println("Connected");
- 
-            // takes input from terminal
-            input  = new DataInputStream(System.in);
- 
-            // sends output to the socket
-            out    = new DataOutputStream(socket.getOutputStream());
-
+        try {
+        		ByteArrayInputStream input = new ByteArrayInputStream(buffer.array());
+        		ObjectInput in = new ObjectInputStream(input);
+        		Message msg = (Message)in.readObject();
+        		String ip = msg.getIpAddress();
+        		int fromID = msg.getId();
+        		Node myNode = dv.myNode;
+        		Collection<Edge> links = dv.al.adjacencyList.get(myNode);
+        		Collection<Edge> changes = msg.getChanges();
+        		for(Edge myLink:links) {
+        			for(Edge change:changes) {
+        				if(myLink.getTo().equals(change.getFrom()) && myLink.getFrom().equals(change.getTo())) {
+        					myLink.setCost(change.getCost());
+        				}
+        			}
+        		}
+        }catch(Exception e) {
+        		System.out.println("Something wrong with client side!!!");
         }
-        catch(UnknownHostException u)
-        {
-            System.out.println(u);
-        }
-        catch(IOException i)
-        {
-            System.out.println(i);
-        }
- 
-        // string to read message from input
-        String line = "";
- 
-        // keep reading until "Over" is input
-        while (!line.equals("Over"))
-        {
-            try
-            {
-                line = input.readLine();
-                out.writeUTF(line);
-            }
-            catch(IOException i)
-            {
-                System.out.println(i);
-            }
-        }
- 
-        // close the connection
-        try
-        {
-            input.close();
-            out.close();
-            socket.close();
-        }
-        catch(IOException i)
-        {
-            System.out.println(i);
-        }
+        
     }
  
 }

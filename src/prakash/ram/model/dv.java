@@ -29,13 +29,13 @@ public class dv {
 	
 	
 	static int time;
-	static AdjacencyList al;
-	static List<SocketChannel> openChannels = new ArrayList<>();
+	public static AdjacencyList al;
+	public static List<SocketChannel> openChannels = new ArrayList<>();
 	public static Selector read;
 	public static Selector write;
 	static String myIP = "";
 	static int myID = Integer.MIN_VALUE;
-	static Node myNode = null;
+	public static Node myNode = null;
 	public static void main(String[] args) throws IOException{
 		
 		read = Selector.open();
