@@ -122,8 +122,8 @@ public class dv {
 		Node to = al.getNode(serverId2);
 		al.changeDistance(from, to, cost);
 		Collection<Edge> edges = al.adjacencyList.get(myNode);
-		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),edges);
-
+		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+		message.setChanges(edges);
 		sendMessage(to,message);
 		System.out.println("Message sent to "+to.getIpAddress());
 		System.out.println("Update success");
