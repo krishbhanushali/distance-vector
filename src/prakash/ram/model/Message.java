@@ -1,7 +1,8 @@
 package prakash.ram.model;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Message implements Serializable{
 
@@ -9,13 +10,12 @@ public class Message implements Serializable{
 	private int id;
 	private String ipAddress;
 	private int port;
-	private Collection<Edge> changes;
+	private Map<Node,Integer> changes = new HashMap<Node,Integer>();
 	public Message(int id, String ipAddress, int port) {
 		super();
 		this.id = id;
 		this.ipAddress = ipAddress;
 		this.port = port;
-		this.changes = changes;
 	}
 	public int getId() {
 		return id;
@@ -35,12 +35,13 @@ public class Message implements Serializable{
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public Collection<Edge> getChanges() {
+	public Map<Node, Integer> getChanges() {
 		return changes;
 	}
-	public void setChanges(Collection<Edge> changes) {
-		this.changes = changes;
+	public void setChanges(Map<Node, Integer> destinationCost) {
+		this.changes = destinationCost;
 	}
+	
 	
 	
 }

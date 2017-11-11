@@ -16,8 +16,10 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Timer;
@@ -37,6 +39,7 @@ public class dv {
 	static String myIP = "";
 	static int myID = Integer.MIN_VALUE;
 	public static Node myNode = null;
+	public static Map<Node,Integer> destinationCost = new HashMap<Node,Integer>();
 	public static void main(String[] args) throws IOException{
 		
 		read = Selector.open();
@@ -123,7 +126,10 @@ public class dv {
 		al.changeDistance(from, to, cost);
 		Collection<Edge> edges = al.adjacencyList.get(myNode);
 		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
-		message.setChanges(edges);
+		for(Edge edge:edges){
+			destinationCost.put(edge.getTo(), edge.getCost());
+		}
+		message.setChanges(destinationCost);
 		sendMessage(to,message);
 		System.out.println("Message sent to "+to.getIpAddress());
 		System.out.println("Update success");
@@ -156,7 +162,10 @@ public class dv {
 		List<Node> neighbors = al.getNeighbors(myNode);
 		Collection<Edge> edges = al.adjacencyList.get(myNode);
 		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
-		message.setChanges(edges);
+		for(Edge edge:edges){
+			destinationCost.put(edge.getTo(), edge.getCost());
+		}
+		message.setChanges(destinationCost);
 		for(Node eachNeighbor:neighbors) {
 			sendMessage(eachNeighbor,message); //sending message to each neighbor
 			System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");
