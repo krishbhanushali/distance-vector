@@ -155,7 +155,8 @@ public class dv {
 	public static void step() throws IOException{
 		List<Node> neighbors = al.getNeighbors(myNode);
 		Collection<Edge> edges = al.adjacencyList.get(myNode);
-		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),edges);
+		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+		message.setChanges(edges);
 		for(Node eachNeighbor:neighbors) {
 			sendMessage(eachNeighbor,message); //sending message to each neighbor
 			System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");

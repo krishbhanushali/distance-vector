@@ -10,7 +10,7 @@ public class Message implements Serializable{
 	private String ipAddress;
 	private int port;
 	private Collection<Edge> changes;
-	public Message(int id, String ipAddress, int port, Collection<Edge> changes) {
+	public Message(int id, String ipAddress, int port) {
 		super();
 		this.id = id;
 		this.ipAddress = ipAddress;
