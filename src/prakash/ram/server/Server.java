@@ -5,6 +5,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.Selector;
+
+import prakash.ram.model.dv;
 
 public class Server extends Thread{
 	private Socket socket = null;
@@ -19,18 +22,7 @@ public class Server extends Thread{
 		 // starts server and waits for a connection
         try
         {
-            server = new ServerSocket(port);
-            System.out.println("Server started");
-            System.out.println("Waiting for a client ...");
- 
-            socket = server.accept();
-            System.out.println("Client accepted");
- 
-            // takes input from the client socket
-            in = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
-            socket.close();
-            in.close();
+            dv.read = Selector.open();
         }
         catch(IOException i)
         {

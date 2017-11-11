@@ -31,8 +31,8 @@ public class dv {
 	static int time;
 	static AdjacencyList al;
 	static List<SocketChannel> openChannels = new ArrayList<>();
-	static Selector read;
-	static Selector write;
+	public static Selector read;
+	public static Selector write;
 	static String myIP = "";
 	static int myID = Integer.MIN_VALUE;
 	static Node myNode = null;
