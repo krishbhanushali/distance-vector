@@ -145,7 +145,11 @@ public class dv {
 					routingTable.put(to, cost);
 					neighbors.add(to);
 				}
-				
+				if(toID == myID){
+					Node from = getNodeById(fromID);
+					routingTable.put(from,cost);
+					neighbors.add(from);
+				}
 			}
 			scanner.close();
 		} catch (FileNotFoundException e) {
@@ -278,7 +282,7 @@ public class dv {
 		while(entries.hasNext()) {
 			Entry thisEntry = (Entry)entries.next();
 			Node n = (Node)thisEntry.getKey();
-			System.out.println(n.getIpAddress()+"\t\t\t"+thisEntry.getValue());
+			System.out.println(n.getId()+"\t\t\t"+thisEntry.getValue());
 		}
 	}
 	
