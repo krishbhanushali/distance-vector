@@ -130,6 +130,7 @@ public class dv {
 				Node server = new Node(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2]));
 				if(parts[1].equals(myIP)) {
 					myID = Integer.parseInt(parts[0]);
+					myNode = server;
 				}
 				routingTable.put(server,Integer.MAX_VALUE);
 				connect(parts[1], Integer.parseInt(parts[2]),myID);
