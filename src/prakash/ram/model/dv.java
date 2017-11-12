@@ -277,7 +277,8 @@ public class dv {
 		Iterator entries =routingTable.entrySet().iterator();
 		while(entries.hasNext()) {
 			Entry thisEntry = (Entry)entries.next();
-			System.out.println(thisEntry.getKey()+"\t\t\t"+thisEntry.getValue());
+			Node n = (Node)thisEntry.getKey();
+			System.out.println(n.getIpAddress()+"\t\t\t"+thisEntry.getValue());
 		}
 	}
 	
