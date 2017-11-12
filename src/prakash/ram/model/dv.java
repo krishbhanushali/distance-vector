@@ -39,7 +39,7 @@ public class dv {
 	public static Selector read;
 	public static Selector write;
 	static String myIP = "";
-	static int myID = Integer.MIN_VALUE;
+	static int myID = Integer.MIN_VALUE+2;
 	public static Node myNode = null;
 	public static Map<Node,Integer> routingTable = new HashMap<Node,Integer>();
 	public static Set<Node> neighbors = new HashSet<Node>();
@@ -132,7 +132,7 @@ public class dv {
 					myID = Integer.parseInt(parts[0]);
 					myNode = server;
 				}
-				routingTable.put(server,Integer.MAX_VALUE);
+				routingTable.put(server,Integer.MAX_VALUE-2);
 				connect(parts[1], Integer.parseInt(parts[2]),myID);
 			}
 			Node myself = getNodeById(myID);
@@ -234,7 +234,7 @@ public class dv {
 			if(semaphore>0) {
 				Set<SelectionKey> keys = write.selectedKeys();
 				Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
-				ByteBuffer buffer = ByteBuffer.allocate(Integer.MAX_VALUE);
+				ByteBuffer buffer = ByteBuffer.allocate(Integer.MAX_VALUE-2);
 				buffer.put(bytes);
 				buffer.flip();
 				while(selectedKeysIterator.hasNext())
