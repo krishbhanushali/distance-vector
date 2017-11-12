@@ -26,6 +26,9 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Timer;
 import java.util.Map.Entry;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import prakash.ram.client.Client;
 import prakash.ram.server.Server;
@@ -210,6 +213,15 @@ public class dv {
 		}
 	}
 	
+	
+	public static Node getNodeByIP(String ipAddress){
+		for(Node node:routingTable.keySet()){
+			if(node.getIpAddress().equals(ipAddress)){
+				return node;
+			}
+		}
+		return null;
+	}
 	public static void step() throws IOException{
 		
 		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
@@ -234,8 +246,11 @@ public class dv {
 			if(semaphore>0) {
 				Set<SelectionKey> keys = write.selectedKeys();
 				Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
-				ByteBuffer buffer = ByteBuffer.allocate(1024);
-				buffer.put(bytes);
+				ByteBuffer buffer = ByteBuffer.allocate(10000);
+				ObjectMapper mapper = new ObjectMapper();
+				String msg = mapper.writeValueAsString(message);
+				
+				buffer.put(msg.getBytes());
 				buffer.flip();
 				while(selectedKeysIterator.hasNext())
 				{
