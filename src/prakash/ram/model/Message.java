@@ -10,7 +10,7 @@ public class Message implements Serializable{
 	private int id;
 	private String ipAddress;
 	private int port;
-	private Map<Node,Integer> changes = new HashMap<Node,Integer>();
+	private Map<Node,Integer> routingTable = new HashMap<Node,Integer>();
 	public Message(int id, String ipAddress, int port) {
 		super();
 		this.id = id;
@@ -35,11 +35,11 @@ public class Message implements Serializable{
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public Map<Node, Integer> getChanges() {
-		return changes;
+	public Map<Node, Integer> getRoutingTable() {
+		return routingTable;
 	}
-	public void setChanges(Map<Node, Integer> destinationCost) {
-		this.changes = destinationCost;
+	public void setRoutingTable(Map<Node, Integer> routingTable) {
+		this.routingTable = routingTable;
 	}
 	
 	

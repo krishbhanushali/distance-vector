@@ -7,8 +7,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import prakash.ram.model.Edge;
 import prakash.ram.model.Message;
@@ -31,15 +34,50 @@ public class Client extends Thread
         		String ip = msg.getIpAddress();
         		int fromID = msg.getId();
         		Node myNode = dv.myNode;
-        		Collection<Edge> links = dv.al.adjacencyList.get(myNode);
-        		Collection<Edge> changes = msg.getChanges();
+        		
+        		Map<Node,Integer> receivedRoutingTable = msg.getRoutingTable();
+        		Map<Node,Integer> myRoutingTable = dv.routingTable;
+        		Iterator myRTEntries = myRoutingTable.entrySet().iterator();
+        		Iterator receivedRTEntries = receivedRoutingTable.entrySet().iterator();
+        		while(myRTEntries.hasNext()) {
+        			while(receivedRTEntries.hasNext()){
+            			Entry myRTEntry = (Entry)myRTEntries.next();
+            			Entry receivedRTEntry = (Entry)receivedRTEntries.next();
+            			
+            			Object key1 = (Node)myRTEntry.getKey();
+            			Node myRTNode = (Node)key1;
+            			
+            			Object key2 = (Node)receivedRTEntry.getKey();
+            			Node receivedRTNode = (Node)key2;
+            			
+            			Object value1 = (Integer)myRTEntry.getValue();
+            			Integer myRTCost = (Integer)value1;
+            			
+            			Object value2 = (Integer)receivedRTEntry.getValue();
+            			Integer receivedRTCost = (Integer)value2;
+            			
+            			if(myRTNode.equals(receivedRTNode)){
+            				if(receivedRTCost+dv.routingTable.get(receivedRTNode)<myRTCost){
+            					dv.routingTable.put(receivedRTNode, receivedRTCost+dv.routingTable.get(receivedRTNode));
+            				}
+            			}
+        			}
+        		}
+        		/*while(entries.hasNext()) {
+        			Entry thisEntry = (Entry)entries.next();
+        			Object key = (Node)thisEntry.getKey();
+        			Node n = (Node)key;
+        			if(n.getId() == id) {
+        				return n;
+        			}
+        		}
         		for(Edge myLink:links) {
         			for(Edge change:changes) {
         				if(myLink.getTo().equals(change.getFrom()) && myLink.getFrom().equals(change.getTo())) {
         					myLink.setCost(change.getCost());
         				}
         			}
-        		}
+        		}*/
         }catch(Exception e) {
         		System.out.println("Something wrong with client side!!!");
         }

@@ -1,6 +1,7 @@
 package prakash.ram.model;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,14 +34,15 @@ public class dv {
 	
 	
 	static int time;
-	public static AdjacencyList al;
+	
 	public static List<SocketChannel> openChannels = new ArrayList<>();
 	public static Selector read;
 	public static Selector write;
 	static String myIP = "";
 	static int myID = Integer.MIN_VALUE;
 	public static Node myNode = null;
-	public static Map<Node,Integer> destinationCost = new HashMap<Node,Integer>();
+	public static Map<Node,Integer> routingTable = new HashMap<Node,Integer>();
+	public static Set<Node> neighbors = new HashSet<Node>();
 	public static void main(String[] args) throws IOException{
 		
 		read = Selector.open();
@@ -64,7 +67,7 @@ public class dv {
 				String filename = arguments[1];
 				time = Integer.parseInt(arguments[3]);
 				readTopology(filename);
-				myNode = al.getNode(myID);
+				
 				break;
 			case "update": //update <server-id1> <server-id2> <link Cost>
 				update(Integer.parseInt(arguments[1]),Integer.parseInt(arguments[2]),Integer.parseInt(arguments[3]));
@@ -116,23 +119,68 @@ public class dv {
 
 	public static void readTopology(String filename) {
 		File file = new File("src/"+filename);
-        al = new AdjacencyList(file,myIP);
+		try {
+			Scanner scanner = new Scanner(file);
+			int numberOfServers = scanner.nextInt();
+			int numberOfNeighbors = scanner.nextInt();
+			scanner.nextLine();
+			for(int i = 0 ; i < numberOfServers;i++) {
+				String line = scanner.nextLine();
+				String[] parts = line.split(" ");
+				Node server = new Node(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2]));
+				if(parts[1].equals(myIP)) {
+					myID = Integer.parseInt(parts[0]);
+				}
+				routingTable.put(server,Integer.MAX_VALUE);
+				Node myself = getNodeById(myID);
+				routingTable.put(myself, 0);
+				connect(parts[1], Integer.parseInt(parts[2]),myID);
+			}
+			
+			for(int i = 0 ; i < numberOfNeighbors;i++) {
+				String line = scanner.nextLine();
+				String[] parts = line.split(" ");
+				int fromID = Integer.parseInt(parts[0]);int toID = Integer.parseInt(parts[1]); int cost = Integer.parseInt(parts[2]);
+				if(fromID == myID){
+					Node to = getNodeById(toID);
+					routingTable.put(to, cost);
+					neighbors.add(to);
+				}
+				
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println(file.getAbsolutePath()+" not found.");
+		}
         System.out.println("Reading topology done.");
 	}
 	
-	public static void update(int serverId1, int serverId2, int cost) throws IOException {
-		Node from = al.getNode(serverId1);
-		Node to = al.getNode(serverId2);
-		al.changeDistance(from, to, cost);
-		Collection<Edge> edges = al.adjacencyList.get(myNode);
-		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
-		for(Edge edge:edges){
-			destinationCost.put(edge.getTo(), edge.getCost());
+	
+	public static Node getNodeById(int id){
+		Iterator entries = routingTable.entrySet().iterator();
+		while(entries.hasNext()) {
+			Entry thisEntry = (Entry)entries.next();
+			Object key = (Node)thisEntry.getKey();
+			Node n = (Node)key;
+			if(n.getId() == id) {
+				return n;
+			}
 		}
-		message.setChanges(destinationCost);
-		sendMessage(to,message);
-		System.out.println("Message sent to "+to.getIpAddress());
-		System.out.println("Update success");
+		return null;
+	}
+	public static void update(int serverId1, int serverId2, int cost) throws IOException {
+		if(serverId1 == myID){
+			Node to = getNodeById(serverId2);
+			routingTable.put(to, cost);
+			Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+			message.setRoutingTable(routingTable);
+			sendMessage(to,message);
+			System.out.println("Message sent to "+to.getIpAddress());
+			System.out.println("Update success");
+		}
+		else{
+			System.out.println("You can only update cost to your own neigbour!");
+		}
 	}
 	
 	public static void connect(String ip, int port, int id) {
@@ -159,13 +207,9 @@ public class dv {
 	}
 	
 	public static void step() throws IOException{
-		List<Node> neighbors = al.getNeighbors(myNode);
-		Collection<Edge> edges = al.adjacencyList.get(myNode);
+		
 		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
-		for(Edge edge:edges){
-			destinationCost.put(edge.getTo(), edge.getCost());
-		}
-		message.setChanges(destinationCost);
+		message.setRoutingTable(routingTable);
 		for(Node eachNeighbor:neighbors) {
 			sendMessage(eachNeighbor,message); //sending message to each neighbor
 			System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");
@@ -173,7 +217,7 @@ public class dv {
 		System.out.println("Step SUCCESS");
 	}
 	
-	public static void sendMessage(Node eachNeigbor, Message message) throws IOException{
+	public static void sendMessage(Node eachNeighbor, Message message) throws IOException{
 		int semaphore = 0;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutput out = null;
@@ -192,7 +236,7 @@ public class dv {
 				while(selectedKeysIterator.hasNext())
 				{
 					SelectionKey selectionKey=selectedKeysIterator.next();
-					if(parseChannelIp((SocketChannel)selectionKey.channel()).equals(al.getNode(eachNeigbor.getId()).getIpAddress()))
+					if(parseChannelIp((SocketChannel)selectionKey.channel()).equals(eachNeighbor.getIpAddress()))
 					{
 						SocketChannel socketChannel=(SocketChannel)selectionKey.channel();
 						socketChannel.write(buffer);
@@ -230,18 +274,11 @@ public class dv {
 	}
 	
 	public static void display() {
-		System.out.println("Next Hop ID\tNext Hop IP\t\tCost");
-		Iterator entries = al.adjacencyList.entrySet().iterator();
+		System.out.println("Destination Server ID\t\tNext Hop Server ID\t\tCost Of Path");
+		Iterator entries =routingTable.entrySet().iterator();
 		while(entries.hasNext()) {
 			Entry thisEntry = (Entry)entries.next();
-			Object key = (Node)thisEntry.getKey();
-			Node n = (Node)key;
-			if(n.getId()==myID) {
-				Collection<Edge> links = al.adjacencyList.get(n);
-				for(Edge edge:links) {
-					System.out.println(edge.getTo().getId()+"\t\t"+edge.getTo().getIpAddress()+"\t\t"+edge.getCost());
-				}
-			}
+			System.out.println(thisEntry.getKey()+"\t\t\t"+thisEntry.getValue());
 		}
 	}
 	
