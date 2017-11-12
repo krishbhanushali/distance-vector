@@ -229,25 +229,25 @@ public class dv {
 			out = new ObjectOutputStream(bos);
 			out.writeObject(message);
 			out.flush();
-//			byte[] bytes = bos.toByteArray();
-//			semaphore = write.select();
-//			if(semaphore>0) {
-//				Set<SelectionKey> keys = write.selectedKeys();
-//				Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
-//				ByteBuffer buffer = ByteBuffer.allocate(Integer.MAX_VALUE-2);
-//				buffer.put(bytes);
-//				buffer.flip();
-//				while(selectedKeysIterator.hasNext())
-//				{
-//					SelectionKey selectionKey=selectedKeysIterator.next();
-//					if(parseChannelIp((SocketChannel)selectionKey.channel()).equals(eachNeighbor.getIpAddress()))
-//					{
-//						SocketChannel socketChannel=(SocketChannel)selectionKey.channel();
-//						socketChannel.write(buffer);
-//					}
-//					selectedKeysIterator.remove();
-//				}
-//			}
+			byte[] bytes = bos.toByteArray();
+			semaphore = write.select();
+			if(semaphore>0) {
+				Set<SelectionKey> keys = write.selectedKeys();
+				Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
+				ByteBuffer buffer = ByteBuffer.allocate(1024);
+				buffer.put(bytes);
+				buffer.flip();
+				while(selectedKeysIterator.hasNext())
+				{
+					SelectionKey selectionKey=selectedKeysIterator.next();
+					if(parseChannelIp((SocketChannel)selectionKey.channel()).equals(eachNeighbor.getIpAddress()))
+					{
+						SocketChannel socketChannel=(SocketChannel)selectionKey.channel();
+						socketChannel.write(buffer);
+					}
+					selectedKeysIterator.remove();
+				}
+			}
 		}catch(Exception e) {
 			System.out.println("Sending failed because "+e.getMessage());
 		}finally {
