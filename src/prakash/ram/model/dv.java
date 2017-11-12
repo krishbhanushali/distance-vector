@@ -132,11 +132,10 @@ public class dv {
 					myID = Integer.parseInt(parts[0]);
 				}
 				routingTable.put(server,Integer.MAX_VALUE);
-				Node myself = getNodeById(myID);
-				routingTable.put(myself, 0);
 				connect(parts[1], Integer.parseInt(parts[2]),myID);
 			}
-			
+			Node myself = getNodeById(myID);
+			routingTable.put(myself, 0);
 			for(int i = 0 ; i < numberOfNeighbors;i++) {
 				String line = scanner.nextLine();
 				String[] parts = line.split(" ");

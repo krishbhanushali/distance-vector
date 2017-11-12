@@ -63,21 +63,6 @@ public class Client extends Thread
             			}
         			}
         		}
-        		/*while(entries.hasNext()) {
-        			Entry thisEntry = (Entry)entries.next();
-        			Object key = (Node)thisEntry.getKey();
-        			Node n = (Node)key;
-        			if(n.getId() == id) {
-        				return n;
-        			}
-        		}
-        		for(Edge myLink:links) {
-        			for(Edge change:changes) {
-        				if(myLink.getTo().equals(change.getFrom()) && myLink.getFrom().equals(change.getTo())) {
-        					myLink.setCost(change.getCost());
-        				}
-        			}
-        		}*/
         }catch(Exception e) {
         		System.out.println("Something wrong with client side!!!");
         }
