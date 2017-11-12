@@ -15,7 +15,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,8 +25,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Timer;
 import java.util.Map.Entry;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import prakash.ram.client.Client;
@@ -235,13 +232,7 @@ public class dv {
 	
 	public static void sendMessage(Node eachNeighbor, Message message) throws IOException{
 		int semaphore = 0;
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutput out = null;
 		try {
-			out = new ObjectOutputStream(bos);
-			out.writeObject(message);
-			out.flush();
-			byte[] bytes = bos.toByteArray();
 			semaphore = write.select();
 			if(semaphore>0) {
 				Set<SelectionKey> keys = write.selectedKeys();
@@ -265,8 +256,6 @@ public class dv {
 			}
 		}catch(Exception e) {
 			System.out.println("Sending failed because "+e.getMessage());
-		}finally {
-			bos.close();
 		}
 	}
 	
