@@ -1,10 +1,6 @@
 package prakash.ram.server;
-
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -13,9 +9,6 @@ import java.nio.channels.SocketChannel;
 import prakash.ram.model.dv;
 
 public class Server extends Thread{
-	private Socket socket = null;
-	private ServerSocket server = null;
-	private DataInputStream in = null;
 	private int port = 0;
 	public Server(int port)
     {
