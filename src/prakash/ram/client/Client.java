@@ -91,7 +91,7 @@ public class Client extends Thread
         			}
         		}
         }catch(Exception e) {
-        		System.out.println("Something wrong with client side!!!");
+        		e.printStackTrace();
         }
         
     }
