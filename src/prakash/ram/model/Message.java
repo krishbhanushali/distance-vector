@@ -1,7 +1,9 @@
 package prakash.ram.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Message implements Serializable{
@@ -10,7 +12,7 @@ public class Message implements Serializable{
 	private int id;
 	private String ipAddress;
 	private int port;
-	private Map<Node,Integer> routingTable = new HashMap<Node,Integer>();
+	private List<String> routingTable= new ArrayList<String>();
 	public Message(int id, String ipAddress, int port) {
 		super();
 		this.id = id;
@@ -35,13 +37,12 @@ public class Message implements Serializable{
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public Map<Node, Integer> getRoutingTable() {
+	public List<String> getRoutingTable() {
 		return routingTable;
 	}
-	public void setRoutingTable(Map<Node, Integer> routingTable) {
+	public void setRoutingTable(List<String> routingTable) {
 		this.routingTable = routingTable;
 	}
-	
 	
 	
 }

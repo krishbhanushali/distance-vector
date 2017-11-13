@@ -4,13 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.Map.Entry;
 import prakash.ram.model.Message;
 import prakash.ram.model.Node;
 import prakash.ram.model.dv;
@@ -50,41 +46,26 @@ public class Client extends Thread
         							message+=((char)buffer.get());
         						}
     							ObjectMapper mapper = new ObjectMapper();
-    							mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
     							Message msg = mapper.readValue(message,Message.class);
     							//increase the number of received messages counter
-    							String ip = msg.getIpAddress();
-    			        		int fromID = msg.getId();
-    			        		Node myNode = dv.myNode;
-    			        		
-    			        		Map<Node,Integer> receivedRoutingTable = msg.getRoutingTable();
-    			        		Map<Node,Integer> myRoutingTable = dv.routingTable;
-    			        		Iterator myRTEntries = myRoutingTable.entrySet().iterator();
-    			        		Iterator receivedRTEntries = receivedRoutingTable.entrySet().iterator();
-    			        		while(myRTEntries.hasNext()) {
-    			        			while(receivedRTEntries.hasNext()){
-    			            			Entry myRTEntry = (Entry)myRTEntries.next();
-    			            			Entry receivedRTEntry = (Entry)receivedRTEntries.next();
-    			            			
-    			            			Object key1 = (Node)myRTEntry.getKey();
-    			            			Node myRTNode = (Node)key1;
-    			            			
-    			            			Object key2 = (Node)receivedRTEntry.getKey();
-    			            			Node receivedRTNode = (Node)key2;
-    			            			
-    			            			Object value1 = (Integer)myRTEntry.getValue();
-    			            			Integer myRTCost = (Integer)value1;
-    			            			
-    			            			Object value2 = (Integer)receivedRTEntry.getValue();
-    			            			Integer receivedRTCost = (Integer)value2;
-    			            			
-    			            			if(myRTNode.equals(receivedRTNode)){
-    			            				if(receivedRTCost+dv.routingTable.get(receivedRTNode)<myRTCost){
-    			            					dv.routingTable.put(receivedRTNode, receivedRTCost+dv.routingTable.get(receivedRTNode));
-    			            				}
-    			            			}
-    			        			}
-        						}
+	    			        		int fromID = msg.getId();
+	    			        		
+	    			        		List<String> receivedRT = msg.getRoutingTable();
+	    			        		List<String> myRT = dv.routingTable;
+	    			        		int costToReceiver = dv.getCost(fromID);
+	    			        		for(String eachReceivedEntry:receivedRT) {
+	    			        			String[] parts1 = eachReceivedEntry.split("#");
+	    			        			
+	    			        			for(String eachMyEntry:myRT) {
+	    			        				String[] parts2 = eachMyEntry.split("#");
+	    			        				if(parts1[0].equals(parts2[0])){
+		    			        				if(Integer.parseInt(parts1[1])+costToReceiver<Integer.parseInt(parts2[1])){
+		    			        					dv.routingTable.remove(eachMyEntry);
+		    			        					dv.routingTable.add(parts1[0]+"#"+Integer.parseInt(parts1[1])+costToReceiver);
+		    			        				}
+		    			        			}
+	    			        			}
+	    			        		}
         					}
         				}
         			}
@@ -96,3 +77,8 @@ public class Client extends Thread
     }
  
 }
+
+
+
+
+
