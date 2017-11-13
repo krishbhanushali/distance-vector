@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map.Entry;
@@ -21,7 +22,7 @@ public class Client extends Thread
     ByteBuffer buffer = ByteBuffer.allocate(1024);
     SocketChannel socketChannel;
     int bytesRead;
-    public void Run()
+    public void run()
     {
         try {
         		while(true){
@@ -47,7 +48,9 @@ public class Client extends Thread
         						buffer.flip();
         						while(buffer.hasRemaining()){
         							message+=((char)buffer.get());
+        							System.out.println(message);
         							ObjectMapper mapper = new ObjectMapper();
+        							mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         							Message msg = mapper.readValue(message,Message.class);
         							//increase the number of received messages counter
         							String ip = msg.getIpAddress();

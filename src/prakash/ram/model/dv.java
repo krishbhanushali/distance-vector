@@ -188,7 +188,6 @@ public class dv {
 	}
 	
 	public static void connect(String ip, int port, int id) {
-		myID = id;
 		System.out.println("Connecting to ip:- "+ip);
 		try {
 			if(!ip.equals(myIP)) {
