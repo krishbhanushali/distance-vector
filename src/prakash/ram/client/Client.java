@@ -52,13 +52,8 @@ public class Client extends Thread
     							ObjectMapper mapper = new ObjectMapper();
     							Message msg = null;
     							boolean messageReceived = false;
-    							try{
-    								msg = mapper.readValue(message,Message.class);
-    								messageReceived = true;
-    							}
-    							catch(JsonMappingException jme){
-    								
-    							}
+								msg = mapper.readValue(message,Message.class);
+								messageReceived = true;
     							dv.numberOfPacketsReceived++;
     			        		int fromID = msg.getId();
     			        		Node fromNode = dv.getNodeById(fromID);
@@ -88,6 +83,21 @@ public class Client extends Thread
     			        		if(msg.getType().equals("disable") || !messageReceived){
     			        			dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
     			        			System.out.println("Routing Table updated with Server "+fromID+"'s cost set to infinity");
+    			        			if(dv.isNeighbor(fromNode)){
+    			        				for(SocketChannel channel:dv.openChannels){
+    			        					if(fromNode.getIpAddress().equals(dv.parseChannelIp(channel))){
+    			        						try {
+    			        							channel.close();
+    			        						} catch (IOException e) {
+    			        							System.out.println("Cannot close the connection;");
+    			        						}
+    			        						dv.openChannels.remove(channel);
+    			        						break;
+    			        					}
+    			        				}
+    			        				dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
+    			        				dv.neighbors.remove(fromNode);
+    			        			}
     			        		}
     			        		if(message.isEmpty()){
     			        			break;

@@ -346,6 +346,8 @@ public class dv {
 	
 	public static boolean disable(Node server) throws IOException{
 		if(isNeighbor(server)){
+			
+			sendMessage(server,new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"disable"));
 			for(SocketChannel channel:openChannels){
 				if(server.getIpAddress().equals(parseChannelIp(channel))){
 					try {
@@ -357,10 +359,8 @@ public class dv {
 					break;
 				}
 			}
-			routingTable.remove(server);
+			routingTable.put(server,Integer.MAX_VALUE-2);
 			neighbors.remove(server);
-			nodes.remove(server);
-			sendMessage(server,new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"disable"));
 			System.out.println("Disabled connection with server "+server.getId()+"("+server.getIpAddress()+")");
 			return true;
 		}
