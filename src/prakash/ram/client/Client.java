@@ -53,14 +53,17 @@ public class Client extends Thread
 	    			        		List<String> receivedRT = msg.getRoutingTable();
 	    			        		List<String> myRT = dv.routingTable;
 	    			        		int costToReceiver = dv.getCost(fromID);
-	    			        		for(String eachReceivedEntry:receivedRT) {
+	    			        		Iterator<String> iter = receivedRT.iterator();
+	    			        		Iterator<String> iter1 = myRT.iterator();
+	    			        		while(iter.hasNext()){
+	    			        			String eachReceivedEntry = iter.next();
 	    			        			String[] parts1 = eachReceivedEntry.split("#");
-	    			        			
-	    			        			for(String eachMyEntry:myRT) {
+	    			        			while(iter1.hasNext()){
+	    			        				String eachMyEntry = iter1.next();
 	    			        				String[] parts2 = eachMyEntry.split("#");
 	    			        				if(parts1[0].equals(parts2[0])){
 		    			        				if(Integer.parseInt(parts1[1])+costToReceiver<Integer.parseInt(parts2[1])){
-		    			        					dv.routingTable.remove(eachMyEntry);
+		    			        					iter1.remove();
 		    			        					dv.routingTable.add(parts1[0]+"#"+Integer.parseInt(parts1[1])+costToReceiver);
 		    			        				}
 		    			        			}

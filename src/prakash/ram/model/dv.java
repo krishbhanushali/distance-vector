@@ -140,10 +140,12 @@ public class dv {
 				int fromID = Integer.parseInt(parts[0]);int toID = Integer.parseInt(parts[1]); int cost = Integer.parseInt(parts[2]);
 				if(fromID == myID){
 					Node to = getNodeById(toID);
-					for(String eachEntry:routingTable){
+					Iterator<String> iter = routingTable.iterator();
+					while(iter.hasNext()){
+						String eachEntry = iter.next();
 						String[] splits = eachEntry.split("#");
 						if(Integer.parseInt(splits[0])==toID){
-							routingTable.remove(eachEntry);
+							iter.remove();
 							routingTable.add(toID+"#"+cost);
 						}
 					}
@@ -151,10 +153,12 @@ public class dv {
 				}
 				if(toID == myID){
 					Node from = getNodeById(fromID);
-					for(String eachEntry:routingTable){
+					Iterator<String> iter = routingTable.iterator();
+					while(iter.hasNext()){
+						String eachEntry = iter.next();
 						String[] splits = eachEntry.split("#");
 						if(Integer.parseInt(splits[0])==fromID){
-							routingTable.remove(eachEntry);
+							iter.remove();
 							routingTable.add(fromID+"#"+cost);
 						}
 					}
