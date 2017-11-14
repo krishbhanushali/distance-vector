@@ -13,9 +13,11 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Timer;
@@ -37,7 +39,8 @@ public class dv {
 	public static Node myNode = null;
 	//public static Map<Node,Integer> routingTable = new HashMap<Node,Integer>();
 	public static List<Node> nodes = new ArrayList<Node>();
-	public static List<String> routingTable = new ArrayList<String>();
+	public static List<String> routingTableMessage = new ArrayList<String>();
+	public static Map<Node,Integer> routingTable = new HashMap<Node,Integer>();
 	public static Set<Node> neighbors = new HashSet<Node>();
 	public static void main(String[] args) throws IOException{
 		
@@ -131,7 +134,7 @@ public class dv {
 					myNode = node;
 					cost = 0;
 				}
-				routingTable.add(parts[0]+"#"+cost);
+				routingTable.put(node,cost);
 				connect(parts[1], Integer.parseInt(parts[2]),myID);
 			}
 			for(int i = 0 ; i < numberOfNeighbors;i++) {
@@ -140,25 +143,12 @@ public class dv {
 				int fromID = Integer.parseInt(parts[0]);int toID = Integer.parseInt(parts[1]); int cost = Integer.parseInt(parts[2]);
 				if(fromID == myID){
 					Node to = getNodeById(toID);
-					for(String eachEntry:routingTable){
-						String[] splits = eachEntry.split("#");
-						if(Integer.parseInt(splits[0])==toID){
-							routingTable.remove(eachEntry);
-							routingTable.add(toID+"#"+cost);
-						}
-					}
+					routingTable.put(to, cost);
 					neighbors.add(to);
 				}
 				if(toID == myID){
 					Node from = getNodeById(fromID);
-					for(String eachEntry:routingTable){
-						String[] splits = eachEntry.split("#");
-						if(Integer.parseInt(splits[0])==fromID){
-							routingTable.remove(eachEntry);
-							routingTable.add(fromID+"#"+cost);
-						}
-					}
-					routingTable.add(fromID+"#"+cost);
+					routingTable.put(from, cost);
 					neighbors.add(from);
 				}
 			}
@@ -181,16 +171,9 @@ public class dv {
 	public static void update(int serverId1, int serverId2, int cost) throws IOException {
 		if(serverId1 == myID){
 			Node to = getNodeById(serverId2);
-			for(String s:routingTable) {
-				String[] parts = s.split("#");
-				if(Integer.parseInt(parts[0])==serverId2) {
-					routingTable.remove(s);
-					routingTable.add(Integer.parseInt(parts[0])+"#"+cost);
-					break;
-				}
-			}
+			routingTable.put(to, cost);
 			Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
-			message.setRoutingTable(routingTable);
+			message.setRoutingTable(makeMessage());
 			sendMessage(to,message);
 			System.out.println("Message sent to "+to.getIpAddress());
 			System.out.println("Update success");
@@ -200,6 +183,16 @@ public class dv {
 		}
 	}
 	
+	
+	public static List<String> makeMessage(){
+		List<String> message = new ArrayList<String>();
+		for (Map.Entry<Node, Integer> entry : routingTable.entrySet()) {
+		    Node key = entry.getKey();
+		    Integer value = entry.getValue();
+		    message.add(key.getId()+"#"+value);
+		}
+		return message;
+	}
 	public static void connect(String ip, int port, int id) {
 		System.out.println("Connecting to ip:- "+ip);
 		try {
@@ -234,7 +227,7 @@ public class dv {
 	public static void step() throws IOException{
 		
 		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
-		message.setRoutingTable(routingTable);
+		message.setRoutingTable(makeMessage());
 		for(Node eachNeighbor:neighbors) {
 			sendMessage(eachNeighbor,message); //sending message to each neighbor
 			System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");
@@ -293,20 +286,12 @@ public class dv {
 		return Integer.parseInt(port);
 	}
 	
-	public static int getCost(int id) {
-		for(String entry:routingTable) {
-			String[] parts = entry.split("#");
-			if(id==Integer.parseInt(parts[0])) {
-				return Integer.parseInt(parts[1]);
-			}
-		}
-		return Integer.MAX_VALUE-2;
-	}
 	public static void display() {
 		System.out.println("Destination Server ID\t\tNext Hop Server ID\t\tCost Of Path");
-		for(String s : routingTable) {
-			String[] parts = s.split("#");
-			System.out.println(parts[0]+"\t\t"+parts[1]);
+		for (Map.Entry<Node, Integer> entry : routingTable.entrySet()) {
+		    Node key = entry.getKey();
+		    Integer value = entry.getValue();
+		    System.out.println(key.getId()+"\t\t"+value);
 		}
 	}
 	

@@ -3,8 +3,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import prakash.ram.model.Message;
@@ -48,24 +50,18 @@ public class Client extends Thread
     							ObjectMapper mapper = new ObjectMapper();
     							Message msg = mapper.readValue(message,Message.class);
     							//increase the number of received messages counter
-	    			        		int fromID = msg.getId();
-	    			        		
-	    			        		List<String> receivedRT = msg.getRoutingTable();
-	    			        		List<String> myRT = dv.routingTable;
-	    			        		int costToReceiver = dv.getCost(fromID);
-	    			        		for(String eachReceivedEntry:receivedRT) {
-	    			        			String[] parts1 = eachReceivedEntry.split("#");
-	    			        			
-	    			        			for(String eachMyEntry:myRT) {
-	    			        				String[] parts2 = eachMyEntry.split("#");
-	    			        				if(parts1[0].equals(parts2[0])){
-		    			        				if(Integer.parseInt(parts1[1])+costToReceiver<Integer.parseInt(parts2[1])){
-		    			        					dv.routingTable.remove(eachMyEntry);
-		    			        					dv.routingTable.add(parts1[0]+"#"+Integer.parseInt(parts1[1])+costToReceiver);
-		    			        				}
-		    			        			}
-	    			        			}
-	    			        		}
+    			        		int fromID = msg.getId();
+    			        		List<String> receivedRT = msg.getRoutingTable();
+    			        		for (Map.Entry<Node, Integer> entry : dv.routingTable.entrySet()) {
+    			        		    for(String eachReceivedEntry:receivedRT){
+    			        		    	String[] parts1 = eachReceivedEntry.split("#");
+    			        		    	if(entry.getKey().getId()==Integer.parseInt(parts1[0])){
+    			        		    		if(Integer.parseInt(parts1[1])+dv.routingTable.get(dv.getNodeById(fromID))<dv.routingTable.get(entry.getKey())){
+    			        		    			dv.routingTable.put(entry.getKey(), Integer.parseInt(parts1[1])+dv.routingTable.get(dv.getNodeById(fromID)));
+    			        		    		}
+    			        		    	}
+    			        		    }
+    			        		}
         					}
         				}
         			}
