@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +17,7 @@ public class Client extends Thread
 {
     Set<SelectionKey> keys;
     Iterator<SelectionKey> selectedKeysIterator;
-    ByteBuffer buffer = ByteBuffer.allocate(1024);
+    ByteBuffer buffer = ByteBuffer.allocate(5000);
     SocketChannel socketChannel;
     int bytesRead;
     public void run()

@@ -242,7 +242,7 @@ public class dv {
 			if(semaphore>0) {
 				Set<SelectionKey> keys = write.selectedKeys();
 				Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
-				ByteBuffer buffer = ByteBuffer.allocate(1024);
+				ByteBuffer buffer = ByteBuffer.allocate(5000);
 				ObjectMapper mapper = new ObjectMapper();
 				String msg = mapper.writeValueAsString(message);
 				
