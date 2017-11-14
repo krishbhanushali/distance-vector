@@ -13,6 +13,7 @@ public class Message implements Serializable{
 	private String ipAddress;
 	private int port;
 	private List<String> routingTable= new ArrayList<String>();
+	public Message(){}
 	public Message(int id, String ipAddress, int port) {
 		super();
 		this.id = id;
