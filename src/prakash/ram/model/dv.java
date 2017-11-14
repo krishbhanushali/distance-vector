@@ -386,7 +386,7 @@ public class dv {
 			if(cost==Integer.MAX_VALUE-2){
 				costStr = "infinity";
 			}
-			tb.addRow(""+eachNode.getId(),""+nextHop.get(eachNode),costStr);
+			tb.addRow(""+eachNode.getId(),""+nextHop.get(eachNode).getId(),costStr);
 		}
 		System.out.println(tb.toString());
 	}
