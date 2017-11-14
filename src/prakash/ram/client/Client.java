@@ -51,16 +51,23 @@ public class Client extends Thread
     							Message msg = mapper.readValue(message,Message.class);
     							//increase the number of received messages counter
     			        		int fromID = msg.getId();
+    			        		Node fromNode = dv.getNodeById(fromID);
+    			        		int cost = dv.routingTable.get(fromNode);
     			        		List<String> receivedRT = msg.getRoutingTable();
-    			        		for (Map.Entry<Node, Integer> entry : dv.routingTable.entrySet()) {
-    			        		    for(String eachReceivedEntry:receivedRT){
-    			        		    	String[] parts1 = eachReceivedEntry.split("#");
-    			        		    	if(entry.getKey().getId()==Integer.parseInt(parts1[0])){
-    			        		    		if(Integer.parseInt(parts1[1])+dv.routingTable.get(dv.getNodeById(fromID))<dv.routingTable.get(entry.getKey())){
-    			        		    			dv.routingTable.put(entry.getKey(), Integer.parseInt(parts1[1])+dv.routingTable.get(dv.getNodeById(fromID)));
-    			        		    		}
-    			        		    	}
-    			        		    }
+    			        		for(String eachReceivedEntry:receivedRT){
+    			        			int id = Integer.parseInt(eachReceivedEntry.split("#")[0]);
+    			        			Node eachNode = dv.getNodeById(id);
+    			        			int costFromMessage = Integer.parseInt(eachReceivedEntry.split("#")[1]);
+	    			        		for(Map.Entry<Node, Integer> entry : dv.routingTable.entrySet()){
+	    			        			if(id == entry.getKey().getId()){
+	    			        				if(dv.neighbors.contains(eachNode) && costFromMessage<cost){
+	    			        					dv.routingTable.put(eachNode,costFromMessage);
+	    			        				}
+	    			        				else if(costFromMessage+cost<dv.routingTable.get(entry.getKey())){
+	    			        					dv.routingTable.put(entry.getKey(),costFromMessage+cost);
+	    			        				}
+	    			        			}
+	    			        		}
     			        		}
         					}
         				}
