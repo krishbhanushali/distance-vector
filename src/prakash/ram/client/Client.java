@@ -1,6 +1,7 @@
 package prakash.ram.client;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
@@ -108,8 +109,14 @@ public class Client extends Thread
     			        		buffer.clear();
                     			if(message.trim().isEmpty())
     								bytesRead =0;
-    							else
+    							else{
+    								try{
     								bytesRead = socketChannel.read(buffer);
+    								}catch(ClosedChannelException cce){
+    									System.out.println("Channel closed for communication with Server "+fromID+".");
+    								}
+    							}
+    								
     							bytesRead=0;
     							selectedKeysIterator.remove();
         					}

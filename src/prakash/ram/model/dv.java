@@ -64,7 +64,7 @@ public class dv {
 		Timer timer = new Timer();
 		Scanner in = new Scanner(System.in);
 		boolean run = true;
-		
+		boolean serverCommandInput = false;
 		while(run) {
 			System.out.println("\n");
 			System.out.println("*********Distance Vector Routing Protocol**********");
@@ -81,45 +81,84 @@ public class dv {
 			String command = arguments[0];
 			switch(command) {
 			case "server": //server <topology-file-name> -i <routing-update-interval>
-				String filename = arguments[1];
-				time = Integer.parseInt(arguments[3]);
-				readTopology(filename);
-				timer.scheduleAtFixedRate(new TimerTask(){
-					@Override
-					public void run() {
-					try {
-						step();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					}
-					}, time*1000, time*1000);
+				if(arguments.length!=4){
+					System.out.println("Incorrect command. Please try again.");
+					break;
+				}
+				try{
+				if(Integer.parseInt(arguments[3])<15){
+					System.out.println("Please input routing update interval above 15 seconds.");
+				}
+				}catch(NumberFormatException nfe){
+					System.out.println("Please input an integer for routing update interval.");
+					break;
+				}
+				if((arguments[1]=="" || arguments[2]=="" || !arguments[2].equals("-i") || arguments[3]=="")){
+					System.out.println("Incorrect command. Please try again.");
+					break;
+				}
+				else{
+					serverCommandInput = true;
+					String filename = arguments[1];
+					time = Integer.parseInt(arguments[3]);
+					readTopology(filename);
+					timer.scheduleAtFixedRate(new TimerTask(){
+						@Override
+						public void run() {
+						try {
+							step();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						}
+						}, time*1000, time*1000);
+				}
 				break;
 			case "update": //update <server-id1> <server-id2> <link Cost>
-				update(Integer.parseInt(arguments[1]),Integer.parseInt(arguments[2]),Integer.parseInt(arguments[3]));
+				if(serverCommandInput)
+					update(Integer.parseInt(arguments[1]),Integer.parseInt(arguments[2]),Integer.parseInt(arguments[3]));
+				else
+					System.out.println("Please input the server command. Thank you.");
 				break;
 			case "step":
-				step();
+				if(serverCommandInput)
+					step();
+				else
+					System.out.println("Please input the server command. Thank you.");
 				break;
 			case "packets":
-				System.out.println("Number of packets received yet = "+numberOfPacketsReceived);
+				if(serverCommandInput)
+					System.out.println("Number of packets received yet = "+numberOfPacketsReceived);
+				else
+					System.out.println("Please input the server command. Thank you.");
 				break;
 			case "display":
-				display();
+				if(serverCommandInput)
+					display();
+				else
+					System.out.println("Please input the server command. Thank you.");
 				break;
 			case "disable":
-				int id = Integer.parseInt(arguments[1]);
-				Node disableServer = getNodeById(id);
-				disable(disableServer);
+				if(serverCommandInput){
+					int id = Integer.parseInt(arguments[1]);
+					Node disableServer = getNodeById(id);
+					disable(disableServer);
+				}
+				else
+					System.out.println("Please input the server command. Thank you.");
 				break;
 			case "crash":
-				run = false;
-				for(Node eachNeighbor:neighbors){
-					disable(eachNeighbor);
+				if(serverCommandInput){
+					run = false;
+					for(Node eachNeighbor:neighbors){
+						disable(eachNeighbor);
+					}
+					System.out.println("Bubyee!! Thank you.");
+					timer.cancel();
+					System.exit(1);
 				}
-				System.out.println("Bubyee!! Thank you.");
-				timer.cancel();
-				System.exit(1);
+				else
+					System.out.println("Please input the server command. Thank you.");
 				break;
 				default:
 					System.out.println("Wrong command! Please check again.");
@@ -192,11 +231,12 @@ public class dv {
 					nextHop.put(from, from);
 				}
 			}
+			System.out.println("Reading topology done.");
 			scanner.close();
 		} catch (FileNotFoundException e) {
 			System.out.println(file.getAbsolutePath()+" not found.");
 		}
-        System.out.println("Reading topology done.");
+        
 	}
 	
 	
