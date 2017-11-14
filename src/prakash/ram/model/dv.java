@@ -125,25 +125,39 @@ public class dv {
 				String[] parts = line.split(" ");
 				Node node = new Node(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2]));
 				nodes.add(node);
+				int cost = Integer.MAX_VALUE-2;
 				if(parts[1].equals(myIP)) {
 					myID = Integer.parseInt(parts[0]);
 					myNode = node;
+					cost = 0;
 				}
-				routingTable.add(parts[0]+"#"+(Integer.MAX_VALUE-2));
+				routingTable.add(parts[0]+"#"+cost);
 				connect(parts[1], Integer.parseInt(parts[2]),myID);
 			}
-			routingTable.add(myID+"#"+"0");
 			for(int i = 0 ; i < numberOfNeighbors;i++) {
 				String line = scanner.nextLine();
 				String[] parts = line.split(" ");
 				int fromID = Integer.parseInt(parts[0]);int toID = Integer.parseInt(parts[1]); int cost = Integer.parseInt(parts[2]);
 				if(fromID == myID){
 					Node to = getNodeById(toID);
-					routingTable.add(toID+"#"+cost);
+					for(String eachEntry:routingTable){
+						String[] splits = eachEntry.split("#");
+						if(Integer.parseInt(splits[0])==toID){
+							routingTable.remove(eachEntry);
+							routingTable.add(toID+"#"+cost);
+						}
+					}
 					neighbors.add(to);
 				}
 				if(toID == myID){
 					Node from = getNodeById(fromID);
+					for(String eachEntry:routingTable){
+						String[] splits = eachEntry.split("#");
+						if(Integer.parseInt(splits[0])==fromID){
+							routingTable.remove(eachEntry);
+							routingTable.add(fromID+"#"+cost);
+						}
+					}
 					routingTable.add(fromID+"#"+cost);
 					neighbors.add(from);
 				}
