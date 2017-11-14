@@ -51,8 +51,8 @@ public class Client extends Thread
     							Message msg = mapper.readValue(message,Message.class);
     							//increase the number of received messages counter
     			        		int fromID = msg.getId();
+    			        		System.out.println("Message received from "+msg.getIpAddress());
     			        		Node fromNode = dv.getNodeById(fromID);
-    			        		int cost = dv.routingTable.get(fromNode);
     			        		List<String> receivedRT = msg.getRoutingTable();
     			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
     			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
@@ -65,17 +65,27 @@ public class Client extends Thread
     			        					int receivedCost = createdReceivedRT.get(dv.myNode);
     			        					if(receivedCost<presentCost){
     			        						dv.routingTable.put(entry1.getKey(),receivedCost);
+    			        						System.out.println(entry1.getKey().getId()+" updated with cost "+receivedCost+".");
     			        					}
     			        				}else{
     			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<entry1.getValue()){
     			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
+    			        						System.out.println(entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
     			        					}
     			        				}
     			        			}
-    			        		}    			        		
+    			        		}    			
         					}
+                			buffer.clear();
+                			if(message.trim().isEmpty())
+								bytesRead =0;
+							else
+								bytesRead = socketChannel.read(buffer);
+							bytesRead=0;
+							selectedKeysIterator.remove();
         				}
         			}
+        			
         		}
         }catch(Exception e) {
         		e.printStackTrace();
