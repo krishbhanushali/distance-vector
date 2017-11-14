@@ -56,17 +56,20 @@ public class Client extends Thread
     			        		int cost = dv.routingTable.get(fromNode);
     			        		List<String> receivedRT = msg.getRoutingTable();
     			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
-    			        		int neighborCost =0;
-    			        		for(Map.Entry<Node, Integer> entry : dv.routingTable.entrySet()){
-    			        			if(entry.getKey().getIpAddress().equals(msg.getIpAddress())){
-    			        				neighborCost = entry.getValue();
+    			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
+    			        			if(entry1.getKey().equals(dv.myNode)){
+    			        				continue;
     			        			}
-    			        		}
-    			        		for(Map.Entry<Node, Integer> entry1:createdReceivedRT.entrySet()){
-    			        			for(Map.Entry<Node, Integer> entry2:dv.routingTable.entrySet()){
-    			        				if(entry1.getKey().getId() == entry2.getKey().getId()){
-    			        					if(entry1.getValue()+neighborCost<entry2.getValue()){
-    			        						dv.routingTable.put(entry2.getKey(),entry1.getValue()+neighborCost );
+    			        			else{
+    			        				int presentCost = entry1.getValue();
+    			        				if(dv.neighbors.contains(entry1.getKey())){
+    			        					int receivedCost = createdReceivedRT.get(dv.myNode);
+    			        					if(receivedCost<presentCost){
+    			        						dv.routingTable.put(entry1.getKey(),receivedCost);
+    			        					}
+    			        				}else{
+    			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<entry1.getValue()){
+    			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
     			        					}
     			        				}
     			        			}
