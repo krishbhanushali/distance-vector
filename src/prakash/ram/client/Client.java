@@ -51,7 +51,6 @@ public class Client extends Thread
     							Message msg = mapper.readValue(message,Message.class);
     							//increase the number of received messages counter
     			        		int fromID = msg.getId();
-    			        		System.out.println("Message received from "+msg.getIpAddress());
     			        		Node fromNode = dv.getNodeById(fromID);
     			        		List<String> receivedRT = msg.getRoutingTable();
     			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
@@ -74,15 +73,21 @@ public class Client extends Thread
     			        					}
     			        				}
     			        			}
-    			        		}    			
+    			        		}  
+    			        		if(message.isEmpty()){
+    			        			break;
+    			        		}
+    			        		else{
+    			        			System.out.println("Message received from Server "+msg.getId()+" ("+dv.parseChannelIp(socketChannel)+")");
+    			        		}
+    			        		buffer.clear();
+                    			if(message.trim().isEmpty())
+    								bytesRead =0;
+    							else
+    								bytesRead = socketChannel.read(buffer);
+    							bytesRead=0;
+    							selectedKeysIterator.remove();
         					}
-                			buffer.clear();
-                			if(message.trim().isEmpty())
-								bytesRead =0;
-							else
-								bytesRead = socketChannel.read(buffer);
-							bytesRead=0;
-							selectedKeysIterator.remove();
         				}
         			}
         			
