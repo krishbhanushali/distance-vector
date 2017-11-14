@@ -159,10 +159,12 @@ public class dv {
 					myID = Integer.parseInt(parts[0]);
 					myNode = node;
 					cost = 0;
-					nextHop.put(myNode, myNode);
+					nextHop.put(node, myNode);
+				}
+				else{
+					nextHop.put(node, null);
 				}
 				routingTable.put(node,cost);
-				nextHop.put(node, null);
 				connect(parts[1], Integer.parseInt(parts[2]),myID);
 			}
 			for(int i = 0 ; i < numberOfNeighbors;i++) {
