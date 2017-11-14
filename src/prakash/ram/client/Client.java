@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import prakash.ram.model.Message;
 import prakash.ram.model.Node;
@@ -48,11 +50,19 @@ public class Client extends Thread
         							message+=((char)buffer.get());
         						}
     							ObjectMapper mapper = new ObjectMapper();
-    							Message msg = mapper.readValue(message,Message.class);
+    							Message msg = null;
+    							boolean messageReceived = false;
+    							try{
+    								msg = mapper.readValue(message,Message.class);
+    								messageReceived = true;
+    							}
+    							catch(JsonMappingException jme){
+    								
+    							}
     							dv.numberOfPacketsReceived++;
     			        		int fromID = msg.getId();
     			        		Node fromNode = dv.getNodeById(fromID);
-    			        		if(msg.getType().equals("step") || msg.getType().equals("update")){
+    			        		if((msg.getType().equals("step") || msg.getType().equals("update") )&& messageReceived) {
     			        			List<String> receivedRT = msg.getRoutingTable();
         			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
         			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
@@ -75,7 +85,7 @@ public class Client extends Thread
         			        			}
         			        		}
     			        		}
-    			        		if(msg.getType().equals("disable")){
+    			        		if(msg.getType().equals("disable") || !messageReceived){
     			        			dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
     			        			System.out.println("Routing Table updated with Server "+fromID+"'s cost set to infinity");
     			        		}
