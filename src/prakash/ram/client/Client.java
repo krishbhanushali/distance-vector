@@ -49,7 +49,7 @@ public class Client extends Thread
         						}
     							ObjectMapper mapper = new ObjectMapper();
     							Message msg = mapper.readValue(message,Message.class);
-    							//increase the number of received messages counter
+    							dv.numberOfPacketsReceived++;
     			        		int fromID = msg.getId();
     			        		Node fromNode = dv.getNodeById(fromID);
     			        		List<String> receivedRT = msg.getRoutingTable();
@@ -62,14 +62,13 @@ public class Client extends Thread
     			        				int presentCost = entry1.getValue();
     			        				if(dv.neighbors.contains(entry1.getKey())){
     			        					int receivedCost = createdReceivedRT.get(dv.myNode);
-    			        					if(receivedCost<presentCost){
-    			        						dv.routingTable.put(entry1.getKey(),receivedCost);
-    			        						System.out.println(entry1.getKey().getId()+" updated with cost "+receivedCost+".");
-    			        					}
+			        						dv.routingTable.put(entry1.getKey(),receivedCost);
+			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+receivedCost+".");
     			        				}else{
-    			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<entry1.getValue()){
+    			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<presentCost){
+    			        						dv.nextHop.put(entry1.getKey(), fromNode);
     			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
-    			        						System.out.println(entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
+    			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
     			        					}
     			        				}
     			        			}
@@ -79,6 +78,8 @@ public class Client extends Thread
     			        		}
     			        		else{
     			        			System.out.println("Message received from Server "+msg.getId()+" ("+dv.parseChannelIp(socketChannel)+")");
+    			        			System.out.println("Current Routing Table:-");
+    			        			dv.display();
     			        		}
     			        		buffer.clear();
                     			if(message.trim().isEmpty())

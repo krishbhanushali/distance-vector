@@ -21,10 +21,13 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Timer;
+import java.util.TimerTask;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import prakash.ram.client.Client;
 import prakash.ram.server.Server;
+import prakash.ram.utilies.TableBuilder;
 
 public class dv {
 	
@@ -42,7 +45,9 @@ public class dv {
 	public static List<String> routingTableMessage = new ArrayList<String>();
 	public static Map<Node,Integer> routingTable = new HashMap<Node,Integer>();
 	public static Set<Node> neighbors = new HashSet<Node>();
-	public static void main(String[] args) throws IOException{
+	public static int numberOfPacketsReceived = 0;
+	public static Map<Node,Node> nextHop = new HashMap<Node,Node>();
+ 	public static void main(String[] args) throws IOException{
 		
 		read = Selector.open();
 		write = Selector.open();
@@ -57,7 +62,18 @@ public class dv {
 		Timer timer = new Timer();
 		Scanner in = new Scanner(System.in);
 		boolean run = true;
+		
 		while(run) {
+			System.out.println("\n");
+			System.out.println("*********Distance Vector Routing Protocol**********");
+			System.out.println("Help Menu");
+			System.out.println("--> Commands you can use");
+			System.out.println("1. server <topology-file> -i <time-interval-in-seconds>");
+			System.out.println("2. update <server-id1> <server-id2> <new-cost>");
+			System.out.println("3. step");
+			System.out.println("4. display <server-id>");
+			System.out.println("5. disable");
+			System.out.println("6. crash");
 			String line = in.nextLine();
 			String[] arguments = line.split(" ");
 			String command = arguments[0];
@@ -66,7 +82,16 @@ public class dv {
 				String filename = arguments[1];
 				time = Integer.parseInt(arguments[3]);
 				readTopology(filename);
-				
+				timer.scheduleAtFixedRate(new TimerTask(){
+					@Override
+					public void run() {
+					try {
+						step();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					}
+					}, time*1000, time*1000);
 				break;
 			case "update": //update <server-id1> <server-id2> <link Cost>
 				update(Integer.parseInt(arguments[1]),Integer.parseInt(arguments[2]),Integer.parseInt(arguments[3]));
@@ -75,6 +100,7 @@ public class dv {
 				step();
 				break;
 			case "packets":
+				System.out.println("Number of packets received yet = "+numberOfPacketsReceived);
 				break;
 			case "display":
 				display();
@@ -133,8 +159,10 @@ public class dv {
 					myID = Integer.parseInt(parts[0]);
 					myNode = node;
 					cost = 0;
+					nextHop.put(myNode, myNode);
 				}
 				routingTable.put(node,cost);
+				nextHop.put(node, null);
 				connect(parts[1], Integer.parseInt(parts[2]),myID);
 			}
 			for(int i = 0 ; i < numberOfNeighbors;i++) {
@@ -145,11 +173,13 @@ public class dv {
 					Node to = getNodeById(toID);
 					routingTable.put(to, cost);
 					neighbors.add(to);
+					nextHop.put(to, to);
 				}
 				if(toID == myID){
 					Node from = getNodeById(fromID);
 					routingTable.put(from, cost);
 					neighbors.add(from);
+					nextHop.put(from, from);
 				}
 			}
 			scanner.close();
@@ -171,19 +201,39 @@ public class dv {
 	public static void update(int serverId1, int serverId2, int cost) throws IOException {
 		if(serverId1 == myID){
 			Node to = getNodeById(serverId2);
-			routingTable.put(to, cost);
-			Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
-			message.setRoutingTable(makeMessage());
-			sendMessage(to,message);
-			System.out.println("Message sent to "+to.getIpAddress());
-			System.out.println("Update success");
+			if(isNeighbor(to)){
+				routingTable.put(to, cost);
+				Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+				message.setRoutingTable(makeMessage());
+				sendMessage(to,message);
+				System.out.println("Message sent to "+to.getIpAddress());
+				System.out.println("Update success");
+			}
+			else{
+				System.out.println("You can only update cost to your own neigbour!");
+			}
 		}
-		else{
-			System.out.println("You can only update cost to your own neigbour!");
+		if(serverId2 == myID){
+			Node to = getNodeById(serverId1);
+			if(isNeighbor(to)){
+				routingTable.put(to, cost);
+				Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+				message.setRoutingTable(makeMessage());
+				sendMessage(to,message);
+				System.out.println("Message sent to "+to.getIpAddress());
+				System.out.println("Update success");
+			}
+			else{
+				System.out.println("You can only update cost to your own neigbour!");
+			}
 		}
 	}
 	
-	
+	public static boolean isNeighbor(Node server){
+		if(neighbors.contains(server))
+			return true;
+		return false;
+	}
 	public static List<String> makeMessage(){
 		List<String> message = new ArrayList<String>();
 		for (Map.Entry<Node, Integer> entry : routingTable.entrySet()) {
@@ -286,13 +336,24 @@ public class dv {
 		return Integer.parseInt(port);
 	}
 	
+	public static boolean disable(Node server){
+		if(isNeighbor(server)){
+			return true;
+		}
+		else{
+			System.out.println("You can only disable connection with your neighbor!!");
+			return false;
+		}
+	}
 	public static void display() {
-		System.out.println("Destination Server ID\t\tNext Hop Server ID\t\tCost Of Path");
+		TableBuilder tb = new TableBuilder();
+		tb.addRow("Destination Server ID","Next Hop Server ID","Cost");
 		for (Map.Entry<Node, Integer> entry : routingTable.entrySet()) {
 		    Node key = entry.getKey();
 		    Integer value = entry.getValue();
-		    System.out.println(key.getId()+"\t\t"+value);
+		    tb.addRow(""+key.getId(),""+nextHop.get(entry.getKey()).getId(),""+value);
 		}
+		System.out.println(tb.toString());
 	}
 	
 }
