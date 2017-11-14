@@ -18,7 +18,7 @@ public class Message implements Serializable{
 		this.id = id;
 		this.ipAddress = ipAddress;
 		this.port = port;
-		this.port = port;
+		this.type = type;
 	}
 	public int getId() {
 		return id;
