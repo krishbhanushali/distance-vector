@@ -1,7 +1,6 @@
 package prakash.ram.model;
 
 import java.io.Serializable;
-
 public class Node implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private int id;
@@ -74,6 +73,5 @@ public class Node implements Serializable{
 			return false;
 		return true;
 	}
-
 	
 }

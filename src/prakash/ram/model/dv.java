@@ -12,6 +12,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +99,12 @@ public class dv {
 				update(Integer.parseInt(arguments[1]),Integer.parseInt(arguments[2]),Integer.parseInt(arguments[3]));
 				break;
 			case "step":
-				step();
+				if(neighbors.size()>0){
+					step();
+				}
+				else{
+					System.out.println("Sorry. No neighbors found to execute the step command.");
+				}
 				break;
 			case "packets":
 				System.out.println("Number of packets received yet = "+numberOfPacketsReceived);
@@ -372,18 +379,26 @@ public class dv {
 	public static void display() {
 		TableBuilder tb = new TableBuilder();
 		tb.addRow("Destination Server ID","Next Hop Server ID","Cost");
-		for (Map.Entry<Node, Integer> entry : routingTable.entrySet()) {
-		    Node key = entry.getKey();
-		    Integer value = entry.getValue();
-		    String cost = value.toString();
-		    if(value==Integer.MAX_VALUE-2){
-		    	cost = "infinity";
-		    }
-		    tb.addRow(""+key.getId(),""+nextHop.get(entry.getKey()).getId(),""+cost);
+		Collections.sort(nodes,new NodeComparator());
+		for(Node eachNode:nodes){
+			int cost = routingTable.get(eachNode);
+			String costStr = ""+cost;
+			if(cost==Integer.MAX_VALUE-2){
+				costStr = "infinity";
+			}
+			tb.addRow(""+eachNode.getId(),""+nextHop.get(eachNode),costStr);
 		}
-		System.out.println(tb.toString());
 	}
+	
 	
 }
 
+class NodeComparator implements Comparator<Node> {
+    @Override
+    public int compare(Node n1, Node n2) {
+    	Integer id1 = n1.getId();
+    	Integer id2 = n2.getId();
+        return id1.compareTo(id2);
+    }
+}
 
