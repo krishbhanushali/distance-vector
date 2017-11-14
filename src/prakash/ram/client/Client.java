@@ -37,7 +37,7 @@ public class Client extends Thread
         						selectedKeysIterator.remove();
         						String IP = dv.parseChannelIp(socketChannel);
         						Node node = dv.getNodeByIP(IP);
-        						//terminate function
+        						dv.disable(node);
         						System.out.println(IP+" remotely closed the connection!");
         						break;
         					}
@@ -52,27 +52,33 @@ public class Client extends Thread
     							dv.numberOfPacketsReceived++;
     			        		int fromID = msg.getId();
     			        		Node fromNode = dv.getNodeById(fromID);
-    			        		List<String> receivedRT = msg.getRoutingTable();
-    			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
-    			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
-    			        			if(entry1.getKey().equals(dv.myNode)){
-    			        				continue;
-    			        			}
-    			        			else{
-    			        				int presentCost = entry1.getValue();
-    			        				if(dv.neighbors.contains(entry1.getKey())){
-    			        					int receivedCost = createdReceivedRT.get(dv.myNode);
-			        						dv.routingTable.put(entry1.getKey(),receivedCost);
-			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+receivedCost+".");
-    			        				}else{
-    			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<presentCost){
-    			        						dv.nextHop.put(entry1.getKey(), fromNode);
-    			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
-    			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
-    			        					}
-    			        				}
-    			        			}
-    			        		}  
+    			        		if(msg.getType().equals("step") || msg.getType().equals("update")){
+    			        			List<String> receivedRT = msg.getRoutingTable();
+        			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
+        			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
+        			        			if(entry1.getKey().equals(dv.myNode)){
+        			        				continue;
+        			        			}
+        			        			else{
+        			        				int presentCost = entry1.getValue();
+        			        				if(dv.neighbors.contains(entry1.getKey())){
+        			        					int receivedCost = createdReceivedRT.get(dv.myNode);
+    			        						dv.routingTable.put(entry1.getKey(),receivedCost);
+    			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+receivedCost+".");
+        			        				}else{
+        			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<presentCost){
+        			        						dv.nextHop.put(entry1.getKey(), fromNode);
+        			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
+        			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
+        			        					}
+        			        				}
+        			        			}
+        			        		}
+    			        		}
+    			        		if(msg.getType().equals("disable")){
+    			        			dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
+    			        			System.out.println("Routing Table updated with Server "+fromID+"'s cost set to infinity");
+    			        		}
     			        		if(message.isEmpty()){
     			        			break;
     			        		}

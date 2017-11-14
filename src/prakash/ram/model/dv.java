@@ -71,8 +71,8 @@ public class dv {
 			System.out.println("1. server <topology-file> -i <time-interval-in-seconds>");
 			System.out.println("2. update <server-id1> <server-id2> <new-cost>");
 			System.out.println("3. step");
-			System.out.println("4. display <server-id>");
-			System.out.println("5. disable");
+			System.out.println("4. display");
+			System.out.println("5. disable <server-id>");
 			System.out.println("6. crash");
 			String line = in.nextLine();
 			String[] arguments = line.split(" ");
@@ -106,9 +106,15 @@ public class dv {
 				display();
 				break;
 			case "disable":
+				int id = Integer.parseInt(arguments[1]);
+				Node disableServer = getNodeById(id);
+				disable(disableServer);
 				break;
 			case "crash":
 				run = false;
+				for(Node eachNeighbor:neighbors){
+					disable(eachNeighbor);
+				}
 				System.out.println("Bubyee!! Thank you.");
 				timer.cancel();
 				System.exit(1);
@@ -205,7 +211,7 @@ public class dv {
 			Node to = getNodeById(serverId2);
 			if(isNeighbor(to)){
 				routingTable.put(to, cost);
-				Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+				Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"update");
 				message.setRoutingTable(makeMessage());
 				sendMessage(to,message);
 				System.out.println("Message sent to "+to.getIpAddress());
@@ -219,7 +225,7 @@ public class dv {
 			Node to = getNodeById(serverId1);
 			if(isNeighbor(to)){
 				routingTable.put(to, cost);
-				Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+				Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"update");
 				message.setRoutingTable(makeMessage());
 				sendMessage(to,message);
 				System.out.println("Message sent to "+to.getIpAddress());
@@ -278,7 +284,7 @@ public class dv {
 	}
 	public static void step() throws IOException{
 		
-		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort());
+		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"step");
 		message.setRoutingTable(makeMessage());
 		for(Node eachNeighbor:neighbors) {
 			sendMessage(eachNeighbor,message); //sending message to each neighbor
@@ -338,8 +344,24 @@ public class dv {
 		return Integer.parseInt(port);
 	}
 	
-	public static boolean disable(Node server){
+	public static boolean disable(Node server) throws IOException{
 		if(isNeighbor(server)){
+			for(SocketChannel channel:openChannels){
+				if(server.getIpAddress().equals(parseChannelIp(channel))){
+					try {
+						channel.close();
+					} catch (IOException e) {
+						System.out.println("Cannot close the connection;");
+					}
+					openChannels.remove(channel);
+					break;
+				}
+			}
+			routingTable.remove(server);
+			neighbors.remove(server);
+			nodes.remove(server);
+			sendMessage(server,new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"disable"));
+			System.out.println("Disabled connection with server "+server.getId()+"("+server.getIpAddress()+")");
 			return true;
 		}
 		else{
@@ -353,7 +375,11 @@ public class dv {
 		for (Map.Entry<Node, Integer> entry : routingTable.entrySet()) {
 		    Node key = entry.getKey();
 		    Integer value = entry.getValue();
-		    tb.addRow(""+key.getId(),""+nextHop.get(entry.getKey()).getId(),""+value);
+		    String cost = value.toString();
+		    if(value==Integer.MAX_VALUE-2){
+		    	cost = "infinity";
+		    }
+		    tb.addRow(""+key.getId(),""+nextHop.get(entry.getKey()).getId(),""+cost);
 		}
 		System.out.println(tb.toString());
 	}
