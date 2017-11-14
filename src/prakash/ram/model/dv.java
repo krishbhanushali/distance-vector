@@ -99,12 +99,7 @@ public class dv {
 				update(Integer.parseInt(arguments[1]),Integer.parseInt(arguments[2]),Integer.parseInt(arguments[3]));
 				break;
 			case "step":
-				if(neighbors.size()>0){
-					step();
-				}
-				else{
-					System.out.println("Sorry. No neighbors found to execute the step command.");
-				}
+				step();
 				break;
 			case "packets":
 				System.out.println("Number of packets received yet = "+numberOfPacketsReceived);
@@ -290,14 +285,19 @@ public class dv {
 		return null;
 	}
 	public static void step() throws IOException{
-		
-		Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"step");
-		message.setRoutingTable(makeMessage());
-		for(Node eachNeighbor:neighbors) {
-			sendMessage(eachNeighbor,message); //sending message to each neighbor
-			System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");
+		if(neighbors.size()>=1){
+			Message message = new Message(myNode.getId(),myNode.getIpAddress(),myNode.getPort(),"step");
+			message.setRoutingTable(makeMessage());
+			for(Node eachNeighbor:neighbors) {
+				sendMessage(eachNeighbor,message); //sending message to each neighbor
+				System.out.println("Message sent to "+eachNeighbor.getIpAddress()+"!");
+			}
+			System.out.println("Step SUCCESS");
 		}
-		System.out.println("Step SUCCESS");
+		else{
+			System.out.println("Sorry. No neighbors found to execute the step command.");
+		}
+		
 	}
 	
 	public static void sendMessage(Node eachNeighbor, Message message) throws IOException{
