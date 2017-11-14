@@ -388,6 +388,7 @@ public class dv {
 			}
 			tb.addRow(""+eachNode.getId(),""+nextHop.get(eachNode),costStr);
 		}
+		System.out.println(tb.toString());
 	}
 	
 	
