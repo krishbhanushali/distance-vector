@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import prakash.ram.model.Message;
 import prakash.ram.model.Node;
@@ -51,52 +53,60 @@ public class Client extends Thread
     							ObjectMapper mapper = new ObjectMapper();
     							Message msg = null;
     							boolean messageReceived = false;
-								msg = mapper.readValue(message,Message.class);
-								messageReceived = true;
-    							dv.numberOfPacketsReceived++;
-    			        		int fromID = msg.getId();
+    							int fromID = 0;
+    							try{
+									msg = mapper.readValue(message,Message.class);
+									messageReceived = true;
+	    							dv.numberOfPacketsReceived++;
+    			        			fromID = msg.getId();
+    							}catch(JsonMappingException jme){
+    								System.out.println("Server "+dv.parseChannelIp(socketChannel)+" crashed.");
+    							}
     			        		Node fromNode = dv.getNodeById(fromID);
-    			        		if((msg.getType().equals("step") || msg.getType().equals("update") )&& messageReceived) {
-    			        			List<String> receivedRT = msg.getRoutingTable();
-        			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
-        			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
-        			        			if(entry1.getKey().equals(dv.myNode)){
-        			        				continue;
-        			        			}
-        			        			else{
-        			        				int presentCost = entry1.getValue();
-        			        				if(dv.neighbors.contains(entry1.getKey())){
-        			        					int receivedCost = createdReceivedRT.get(dv.myNode);
-    			        						dv.routingTable.put(entry1.getKey(),receivedCost);
-    			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+receivedCost+".");
-        			        				}else{
-        			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<presentCost){
-        			        						dv.nextHop.put(entry1.getKey(), fromNode);
-        			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
-        			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
-        			        					}
-        			        				}
-        			        			}
-        			        		}
-    			        		}
-    			        		if(msg.getType().equals("disable") || !messageReceived){
-    			        			dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
-    			        			System.out.println("Routing Table updated with Server "+fromID+"'s cost set to infinity");
-    			        			if(dv.isNeighbor(fromNode)){
-    			        				for(SocketChannel channel:dv.openChannels){
-    			        					if(fromNode.getIpAddress().equals(dv.parseChannelIp(channel))){
-    			        						try {
-    			        							channel.close();
-    			        						} catch (IOException e) {
-    			        							System.out.println("Cannot close the connection;");
-    			        						}
-    			        						dv.openChannels.remove(channel);
-    			        						break;
-    			        					}
-    			        				}
-    			        				dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
-    			        				dv.neighbors.remove(fromNode);
-    			        			}
+    			        		if(msg!=null){
+	    			        		if((msg.getType().equals("step") || msg.getType().equals("update") )&& messageReceived) {
+	    			        			List<String> receivedRT = msg.getRoutingTable();
+	        			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
+	        			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
+	        			        			if(entry1.getKey().equals(dv.myNode)){
+	        			        				continue;
+	        			        			}
+	        			        			else{
+	        			        				int presentCost = entry1.getValue();
+	        			        				if(dv.neighbors.contains(entry1.getKey())){
+	        			        					int receivedCost = createdReceivedRT.get(dv.myNode);
+	    			        						dv.routingTable.put(entry1.getKey(),receivedCost);
+	    			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+receivedCost+".");
+	        			        				}else{
+	        			        					if(dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())<presentCost){
+	        			        						dv.nextHop.put(entry1.getKey(), fromNode);
+	        			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
+	        			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
+	        			        					}
+	        			        				}
+	        			        			}
+	        			        		}
+	    			        		}
+	        					
+	    			        		if(msg.getType().equals("disable") || !messageReceived){
+	    			        			dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
+	    			        			System.out.println("Routing Table updated with Server "+fromID+"'s cost set to infinity");
+	    			        			if(dv.isNeighbor(fromNode)){
+	    			        				for(SocketChannel channel:dv.openChannels){
+	    			        					if(fromNode.getIpAddress().equals(dv.parseChannelIp(channel))){
+	    			        						try {
+	    			        							channel.close();
+	    			        						} catch (IOException e) {
+	    			        							System.out.println("Cannot close the connection;");
+	    			        						}
+	    			        						dv.openChannels.remove(channel);
+	    			        						break;
+	    			        					}
+	    			        				}
+	    			        				dv.routingTable.put(fromNode, Integer.MAX_VALUE-2);
+	    			        				dv.neighbors.remove(fromNode);
+	    			        			}
+	    			        		}
     			        		}
     			        		if(message.isEmpty()){
     			        			break;
