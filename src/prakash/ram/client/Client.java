@@ -60,8 +60,8 @@ public class Client extends Thread
     			        			int costFromMessage = Integer.parseInt(eachReceivedEntry.split("#")[1]);
 	    			        		for(Map.Entry<Node, Integer> entry : dv.routingTable.entrySet()){
 	    			        			if(id == entry.getKey().getId()){
-	    			        				if(dv.neighbors.contains(eachNode) && costFromMessage<cost){
-	    			        					dv.routingTable.put(eachNode,costFromMessage);
+	    			        				if(dv.neighbors.contains(fromNode) && costFromMessage<cost){
+	    			        					dv.routingTable.put(fromNode,costFromMessage);
 	    			        				}
 	    			        				else if(costFromMessage+cost<dv.routingTable.get(entry.getKey())){
 	    			        					dv.routingTable.put(entry.getKey(),costFromMessage+cost);
