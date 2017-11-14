@@ -158,7 +158,6 @@ public class dv {
 							routingTable.add(fromID+"#"+cost);
 						}
 					}
-					routingTable.add(fromID+"#"+cost);
 					neighbors.add(from);
 				}
 			}
