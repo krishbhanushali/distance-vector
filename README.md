@@ -16,7 +16,7 @@ _Examples of distance vector routing protocols are [RIPv1, RIPv2](https://en.wik
 
 ## 3. Protocol Specification
 ### 3.1 Topology Establishment
-I used 4 servers/computers/laptops to implement the simulation. **The four servers are required to form a network topology as shown in fig 1**.Each server is supplied with a topology file at startup that it uses to build its initial routing table. The topology file is local and contains the link cost to the neighbors. For all other servers in the network, the initial cost would be infinity. Each server can only read the topology file for itself. The entries of a topology file are listed below:
+I used 4 servers/computers/laptops to implement the simulation. **The four servers are required to form a network topology as shown in Figure 1**. Each server is supplied with a topology file at startup that it uses to build its initial routing table. The topology file is local and contains the link cost to the neighbors. For all other servers in the network, the initial cost would be infinity. Each server can only read the topology file for itself. The entries of a topology file are listed below:
 * num-servers
 * num-neighbors
 * server-ID server-IP server-port
@@ -27,4 +27,15 @@ I used 4 servers/computers/laptops to implement the simulation. **The four serve
 **cost:** cost of a given link between a pair of servers. Assume that cost is an integer value.
 Here is an example, consider the topology in Figure 1. We give a topology file for server 1 as shown
 in the table below.
-![Figure 1. The network topology](/images/topology.png)
+![Figure 1. The network topology](/images/network_topology.PNG)
+
+Line Number| Line Entry | Comments
+---------- | ---------- | --------
+1|4|number of servers
+2|3|number of edges or neighbors
+3|1 192.168.0.112 2000|server-id1 and corresponding IP and port
+4|2 192.168.0.100 2001|server-id2 and corresponding IP and port
+5|3 192.168.0.118 2002|server-id3 and corresponding IP and port
+6|4 192.168.0.117 2003|server-id4 and corresponding IP and port
+7|1 2 7| server-id and neighbor-id and cost
+8|1 4 2| server-id and neighbor-id and cost
