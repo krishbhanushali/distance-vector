@@ -27,7 +27,7 @@ I used 4 servers/computers/laptops to implement the simulation. **The four serve
 **cost:** cost of a given link between a pair of servers. Assume that cost is an integer value.
 Here is an example, consider the topology in Figure 1. We give a topology file for server 1 as shown
 in the table below.
-![Figure 1. The network topology](/images/network_topology.PNG)
+![Figure 1. The network topology](/images/network_topology.png)
 
 Line Number| Line Entry | Comments
 ---------- | ---------- | --------
