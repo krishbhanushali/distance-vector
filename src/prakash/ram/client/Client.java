@@ -64,7 +64,17 @@ public class Client extends Thread
     							}
     			        		Node fromNode = dv.getNodeById(fromID);
     			        		if(msg!=null){
-	    			        		if((msg.getType().equals("step") || msg.getType().equals("update") )&& messageReceived) {
+    			        			
+    			        			if(msg.getType().equals("update") && messageReceived){
+    			        				List<String> receivedRT = msg.getRoutingTable();
+	        			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
+	        			        		int presentCost = dv.routingTable.get(fromNode);
+	        			        		int updatedCost = createdReceivedRT.get(dv.myNode);
+	        			        		if(presentCost!=updatedCost){
+	        			        			dv.routingTable.put(fromNode,updatedCost);
+	        			        		}
+    			        			}
+	    			        		if(msg.getType().equals("step") && messageReceived) {
 	    			        			List<String> receivedRT = msg.getRoutingTable();
 	        			        		Map<Node,Integer> createdReceivedRT = makeRT(receivedRT);
 	        			        		for(Map.Entry<Node, Integer> entry1 : dv.routingTable.entrySet()){
@@ -73,7 +83,13 @@ public class Client extends Thread
 	        			        			}
 	        			        			else{
 	        			        				int presentCost = entry1.getValue();
-	        			        				if(dv.neighbors.contains(entry1.getKey())){
+	        			        				int costToReceipient = createdReceivedRT.get(dv.myNode); 
+	        			        				int costToFinalDestination = createdReceivedRT.get(entry1.getKey());
+        			        					if(costToReceipient+costToFinalDestination < presentCost){
+        			        					dv.routingTable.put(entry1.getKey(),costToReceipient+costToFinalDestination);
+        			        					dv.nextHop.put(entry1.getKey(),fromNode);
+	        			        				
+	        			        				/*if(dv.neighbors.contains(entry1.getKey())){
 	        			        					int receivedCost = createdReceivedRT.get(dv.myNode);
 	    			        						dv.routingTable.put(entry1.getKey(),receivedCost);
 	    			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+receivedCost+".");
@@ -83,7 +99,7 @@ public class Client extends Thread
 	        			        						dv.routingTable.put(entry1.getKey(),dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey()));
 	        			        						System.out.println("Server "+entry1.getKey().getId()+" updated with cost "+dv.routingTable.get(fromNode)+createdReceivedRT.get(entry1.getKey())+".");
 	        			        					}
-	        			        				}
+	        			        				}*/
 	        			        			}
 	        			        		}
 	    			        		}
@@ -132,7 +148,7 @@ public class Client extends Thread
         					}
         				}
         			}
-        			
+        			}
         		}
         }catch(Exception e) {
         		e.printStackTrace();

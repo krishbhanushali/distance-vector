@@ -426,7 +426,11 @@ public class dv {
 			if(cost==Integer.MAX_VALUE-2){
 				costStr = "infinity";
 			}
-			tb.addRow(""+eachNode.getId(),""+nextHop.get(eachNode).getId(),costStr);
+			String nextHopID = "N.A";
+			if(nextHop.get(eachNode)!=null){
+				nextHopID = ""+nextHop.get(eachNode).getId(); 
+			}
+			tb.addRow(""+eachNode.getId(),""+nextHopID,costStr);
 		}
 		System.out.println(tb.toString());
 	}
