@@ -27,7 +27,7 @@ I used 4 servers/computers/laptops to implement the simulation. **The four serve
 **cost:** cost of a given link between a pair of servers. Assume that cost is an integer value.
 Here is an example, consider the topology in Figure 1. We give a topology file for server 1 as shown
 in the table below.
-![Figure 1. The network topology](/images/network_topology.png)
+![Figure 1. The network topology](/images/network_topology1.png)
 
 Line Number| Line Entry | Comments
 ---------- | ---------- | --------
@@ -39,3 +39,6 @@ Line Number| Line Entry | Comments
 6|4 192.168.0.117 2003|server-id4 and corresponding IP and port
 7|1 2 7| server-id and neighbor-id and cost
 8|1 4 2| server-id and neighbor-id and cost
+
+### IMPORTANT: 
+In this environment, costs are bi-directional i.e. the cost of a link from A-B is the same for B-A. Whenever a new server is added to the network, it will read its topology file to determine who its neighbors are. Routing updates are exchanged periodically between neighboring servers. When this newly added server sends routing messages to its neighbors, they will add an entry in their routing tables corresponding to it. Servers can also be removed from a network. When a server has been removed from a network, it will no longer send distance vector updates to its neighbors. When a server no longer receives distance vector updates from its neighbor for three consecutive update intervals, it assumes that the neighbor no longer exists in the network and makes the appropriate changes to its routing table (link cost to this neighbor will now be set to infinity but not remove it from the table). This information is propagated to other servers in the network with the exchange of routing updates. Please note that although a server might be specified as a neighbor with a valid link cost in the topology file, the absence of three consecutive routing updates from this server will imply that it is no longer present in the network.
