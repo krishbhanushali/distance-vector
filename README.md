@@ -97,3 +97,10 @@ Destination ID | Next Hop ID | Cost
 And now the network topology looks like the following figure 2.
 
 ![Figure 2. Updated network topology](/images/updated_network_topology.png)
+
+3. _step_
+Send routing update to neighbors right away. Note that except this, routing updates only happen periodically.
+Let me explain how the neighbors would update their routing table based on the information sent to it by its neighbors.
+Assume server 2's routing table is the above updated one. Say, server 2 performs the step command. So it will send its routing table to server 1, server 3 and server 4. See below figure,
+
+![Figure 3. Server 2 performing step](/images/step_topology_2_to_all.png)
