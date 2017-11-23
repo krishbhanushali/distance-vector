@@ -57,12 +57,12 @@ The server supports the following commands:-
 * crash
 
 Below is the description of each of the above commands-
-1. _server -t topology-file-name -i time-interval-for-step_
+1. _server -t topology-file-name -i time-interval-for-step_:- 
 This command starts the server after reading the topology file and gets the time interval to trigger the step process repeatedly. No other command can be executed unless this command is executed.
 **_topology-file-name_** :- topology file name in which the topology is mentioned.
 **_time-interval-for-step_** :- time interval to perform the step process in a repetitive manner.
 
-2. _update server-id1 server-id2 updated-cost_
+2. _update server-id1 server-id2 updated-cost_:- 
 This command updates the routing table of both of the servers i.e., server-id1 and server-id2 with the updated cost. Note
 that this command will be issued to both server-ID1 and server-ID2 and involve them to update the cost and no other server.
 For example:-
@@ -98,9 +98,25 @@ And now the network topology looks like the following figure 2.
 
 ![Figure 2. Updated network topology](/images/updated_network_topology.png)
 
-3. _step_
+3. _step_:- 
 Send routing update to neighbors right away. Note that except this, routing updates only happen periodically.
 Let me explain how the neighbors would update their routing table based on the information sent to it by its neighbors.
 Assume server 2's routing table is the above updated one. Say, server 2 performs the step command. So it will send its routing table to server 1, server 3 and server 4. See below figure,
 
 ![Figure 3. Server 2 performing step](/images/step_topology_2_to_all.png)
+
+let's assume Server 1 is having the routing table mentioned above after the update command. When server 1 receives the routing table from server 2, it then applies the [Bellman-Ford Algorithm](https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm) to update all its cost if any. It compares all of its cost to all nodes with the routing table it received. For example,
+> Cost from 1 to 3 is infinity and cost from 2 to 3 is 8.
+> When server 1 receives the routing table from server 2, it updates its cost to server 3 only if the cost from server 1 to server 2 plus cost from server 2 to server 3 is less than the present cost to server 3 in the routing table.
+As cost from 1 to 2 is 3 and cost from 2 to 3 is 8 which is equal to (3+8) = 11. 11 is ofcourse less than infinity, thus it updates it routing table to cost to 3 as 11 and updates next hop as 2.
+
+> NOTE : This same thing would happen when server 2 sends its routing table to server 3. Server 3 would also do the same operations.
+**Thus, each server when receives routing table from its neighbors performs the Bellman-Ford Algorithm and updates its routing table if required**
+
+4. _packets_:- Display the number of distance vector packets this server has received since the last invocation of this information.
+
+5. _display_:- Display the current routing table. And the table should be displayed in a sorted order from small ID to big. The display should be formatted as a sequence of lines, with each line indicating: destination-server-ID next-hop-server-ID cost-of-path
+
+6. _disable server-id_:- Disable the link to a given server. Doing this “closes” the connection to a given server with server-ID. Here need to check is if the given server is its neighbor.
+
+7. _crash_:- “Close” all connections. This is to simulate server crashes. Close all connections on all links. The neighboring servers must handle this close correctly and set the link cost to infinity.
