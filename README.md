@@ -47,3 +47,53 @@ In this environment, costs are bi-directional i.e. the cost of a link from A-B i
 Routing updates are exchanged periodically between neighboring servers based on a time interval specified at the startup. In addition to exchanging distance vector updates, servers must also be able torespond to user-specified events. There are 4 possible events in this system. They can be grouped into three classes: topology changes, queries and exchange commands: (1) Topology changes refer to an updating of link status (update). (2) Queries include the ability to ask a server for its current routing table (display), and to ask a server for the number of distance vectors it has received (packets). In the case of the packets command, the value is reset to zero by a server after it satisfies the query. (3) Exchange commands can cause a server to send distance vectors to its neighbors immediately.
 
 ## 4. Server Commands/ Input format
+The server supports the following commands:-
+* server -t topology-file-name -i time-interval-for-step
+* update server-id1 server-id2 updated-cost
+* step
+* packets
+* display
+* disable server-id
+* crash
+
+Below is the description of each of the above commands-
+1. _server -t topology-file-name -i time-interval-for-step_
+This command starts the server after reading the topology file and gets the time interval to trigger the step process repeatedly. No other command can be executed unless this command is executed.
+**_topology-file-name_** :- topology file name in which the topology is mentioned.
+**_time-interval-for-step_** :- time interval to perform the step process in a repetitive manner.
+
+2. _update server-id1 server-id2 updated-cost_
+This command updates the routing table of both of the servers i.e., server-id1 and server-id2 with the updated cost. Note
+that this command will be issued to both server-ID1 and server-ID2 and involve them to update the cost and no other server.
+For example:-
+**update 1 2 3** - Assume this update command is sent from server 1 to server 2. The cost of the link is changed 3 in both of the routing tables.
+Assume server 1 to have the following intial routing table before execution of any step and update command:- (The Routing table is based on the topology specified in Figure 1)
+
+Destination ID | Next Hop ID | Cost
+-------------- | ----------- | ----
+1|1|0
+2|2|7
+3|N. A|inf
+4|4|2
+
+After the update command is sent from server 1 to server 2, the routing table of server 1 looks like below
+
+Destination ID | Next Hop ID | Cost
+-------------- | ----------- | ----
+1|1|0
+2|2|3
+3|N. A|inf
+4|4|2
+
+And routing table of server 2 looks like below
+
+Destination ID | Next Hop ID | Cost
+-------------- | ----------- | ----
+1|1|3
+2|2|0
+3|3|8
+4|4|3
+
+And now the network topology looks like the following figure 2.
+
+![Figure 2. Updated network topology](/images/updated_network_topology.png)
